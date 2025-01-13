@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>重要的宏 - C语言高级技巧</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "\u91cd\u8981\u7684\u5b8f";
+        var mkdocs_page_input_path = "macros.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> C语言高级技巧
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">引言</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">重要的宏</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#offsetof">offsetof</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#offsetgcc">offset在gcc下的实现</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#offsetmsvc">offset在msvc下的实现</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#offsetof_1">offsetof的优缺点</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#offsetof_2">offsetof的使用</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#containerof">containerof</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#containerof_1">containerof的实现</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#container_of">container_of的示例</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../object_oriented/">面向对象</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../template/">模板（泛型）</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">C语言高级技巧</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">重要的宏</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="_1">重要的宏</h1>
+<h2 id="offsetof">offsetof</h2>
+<p>offsetof 是一个宏，通常在 C 和 C++ 编程中用来计算一个结构体成员相对于结构体起始位置的字节偏移量。这个宏在 <stddef.h> 或者 <cstddef> 头文件中定义。它主要用于低级系统编程和序列化操作，通过计算地址偏移，可以更灵活地操作结构体中的成员。</p>
+<p>语法</p>
+<pre><code class="language-c">#include &lt;stddef.h&gt;
+
+offsetof(type, member)
+// type: 结构体类型。
+// member: 需要计算偏移量的结构体成员的名字。
+### offsetof的实现
+</code></pre>
+<h4 id="offsetgcc">offset在gcc下的实现</h4>
+<pre><code class="language-c">#define offsetof(type, member) ((size_t) &amp;((type *)0)-&gt;member)
+</code></pre>
+<p>这个定义直接通过解引用空指针来访问成员变量m的地址，然后计算偏移量。由于C语言允许这种操作，这种实现方式在实际应用中可以正常工作，但存在潜在的风险，因为对空指针的解引用是不安全的‌</p>
+<h4 id="offsetmsvc">offset在msvc下的实现</h4>
+<pre><code class="language-c">#define offsetof(s,m) ((size_t)&amp;reinterpret_cast&lt;char const volatile&amp;&gt;((((s*)0)-&gt;m)))
+</code></pre>
+<p>在ANSI C中, &amp;((st <em>)(0))-&gt;m不会对0(NULL)真正的进行解引用, 而会直接返回m的地址, 这样就避免了对NULL解引用会造成的段错误. 而在c++中, 并没有这样的规则, 所以如果想ANSI C这样实现offsetof会引起段错误. 也知道char</em>是各种type中standard里唯一保证过sizeof是1, 其它都是implemention dependent.
+使用volatile关键字是为了防止编译器优化掉对空指针的解引用操作，确保在编译时能够正确计算偏移量‌</p>
+<h3 id="offsetof_1">offsetof的优缺点</h3>
+<ul>
+<li>‌优点‌：能够在编译时计算出结构体成员的偏移量，提高程序的效率和准确性。</li>
+<li>‌缺点‌：对空指针的解引用存在不安全因素，可能导致程序崩溃。在C++中直接使用可能会导致未定义行为。</li>
+</ul>
+<h3 id="offsetof_2">offsetof的使用</h3>
+<pre><code class="language-c">#include &lt;stddef.h&gt;
+
+#ifndef offsetof
+#define offsetof(type, member) ((size_t) &amp;((type *)0)-&gt;member)
+#endif
+
+// 示例使用
+struct MyStruct {
+    int a;
+    char b;
+    double c;
+};
+
+int main() {
+    size_t offset_of_a = offsetof(struct MyStruct, a);
+    size_t offset_of_b = offsetof(struct MyStruct, b);
+    size_t offset_of_c = offsetof(struct MyStruct, c);
+
+    printf(&quot;Offset of 'a' is: %zu\n&quot;, offset_of_a);
+    printf(&quot;Offset of 'b' is: %zu\n&quot;, offset_of_b);
+    printf(&quot;Offset of 'c' is: %zu\n&quot;, offset_of_c);
+
+    return 0;
+}
+</code></pre>
+<h2 id="containerof">containerof</h2>
+<p>‌container_of‌是一个在Linux内核中广泛使用的宏定义，主要用于通过结构体成员的地址来获取该结构体的地址。其定义如下：</p>
+<h3 id="containerof_1">containerof的实现</h3>
+<pre><code class="language-c">#define container_of(ptr, type, member) ({ \
+    void *__mptr = (void *)(ptr); \
+    BUILD_BUG_ON_MSG(!__same_type(*(ptr), ((type *)0)-&gt;member) &amp;&amp; \
+    !__same_type(*(ptr), void), \
+    &quot;pointer type mismatch in container_of()&quot;); \
+    ((type *)(__mptr - offsetof(type, member))); \
+})
+</code></pre>
+<p>使用方法
+container_of宏接受三个参数：</p>
+<p>ptr：指向结构体成员的指针。
+type：该成员所在的结构体的类型。
+member：结构体中成员的名称。
+实现原理
+1. ‌类型检查‌：首先，通过__same_type宏检查ptr指向的类型是否与type类型匹配，确保类型安全。
+2. ‌计算偏移量‌：使用offsetof宏计算成员member在结构体中的偏移量。
+3. ‌指针转换‌：最后，通过减去偏移量来计算结构体的地址，并将其转换为正确的类型。</p>
+<h3 id="container_of">container_of的示例</h3>
+<p>假设有一个结构体struct foo，其中包含一个成员变量bar，可以通过以下方式使用container_of：</p>
+<pre><code class="language-c">struct foo {
+    int bar;
+    // 其他成员...
+};
+
+struct foo *foo_ptr = ...; // 假设已经获取到foo_ptr的地址
+int *bar_ptr = &amp;foo_ptr-&gt;bar; // 获取bar的地址
+struct foo *foo_struct = container_of(bar_ptr, struct foo, bar); // 通过bar_ptr获取foo_struct的地址
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href=".." class="btn btn-neutral float-left" title="引言"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../object_oriented/" class="btn btn-neutral float-right" title="面向对象">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../object_oriented/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
