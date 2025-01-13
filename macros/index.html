@@ -48,13 +48,17 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#offsetof">offsetof</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#offsetgcc">offset在gcc下的实现</a>
+    <li class="toctree-l3"><a class="reference internal" href="#offsetof_1">offsetof的实现</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#offsetgcc">offset在gcc下的实现</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#offsetmsvc">offset在msvc下的实现</a>
+    <li class="toctree-l4"><a class="reference internal" href="#offsetmsvc">offset在msvc下的实现</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#offsetof_1">offsetof的优缺点</a>
+        </ul>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#offsetof_2">offsetof的使用</a>
+    <li class="toctree-l3"><a class="reference internal" href="#offsetof_2">offsetof的优缺点</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#offsetof_3">offsetof的使用</a>
     </li>
         </ul>
     </li>
@@ -109,8 +113,8 @@
 offsetof(type, member)
 // type: 结构体类型。
 // member: 需要计算偏移量的结构体成员的名字。
-### offsetof的实现
 </code></pre>
+<h3 id="offsetof_1">offsetof的实现</h3>
 <h4 id="offsetgcc">offset在gcc下的实现</h4>
 <pre><code class="language-c">#define offsetof(type, member) ((size_t) &amp;((type *)0)-&gt;member)
 </code></pre>
@@ -120,12 +124,12 @@ offsetof(type, member)
 </code></pre>
 <p>在ANSI C中, &amp;((st <em>)(0))-&gt;m不会对0(NULL)真正的进行解引用, 而会直接返回m的地址, 这样就避免了对NULL解引用会造成的段错误. 而在c++中, 并没有这样的规则, 所以如果想ANSI C这样实现offsetof会引起段错误. 也知道char</em>是各种type中standard里唯一保证过sizeof是1, 其它都是implemention dependent.
 使用volatile关键字是为了防止编译器优化掉对空指针的解引用操作，确保在编译时能够正确计算偏移量‌</p>
-<h3 id="offsetof_1">offsetof的优缺点</h3>
+<h3 id="offsetof_2">offsetof的优缺点</h3>
 <ul>
 <li>‌优点‌：能够在编译时计算出结构体成员的偏移量，提高程序的效率和准确性。</li>
 <li>‌缺点‌：对空指针的解引用存在不安全因素，可能导致程序崩溃。在C++中直接使用可能会导致未定义行为。</li>
 </ul>
-<h3 id="offsetof_2">offsetof的使用</h3>
+<h3 id="offsetof_3">offsetof的使用</h3>
 <pre><code class="language-c">#include &lt;stddef.h&gt;
 
 #ifndef offsetof
