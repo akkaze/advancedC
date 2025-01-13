@@ -45,6 +45,14 @@
               </ul>
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="#">面向对象</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#_2">重要的宏</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#offsetof">offsetof</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
                 </li>
               </ul>
               <ul>
@@ -74,7 +82,19 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                
+                <h1 id="_1">面向对象</h1>
+<h2 id="_2">重要的宏</h2>
+<h3 id="offsetof">offsetof</h3>
+<p>offsetof 是一个宏，通常在 C 和 C++ 编程中用来计算一个结构体成员相对于结构体起始位置的字节偏移量。这个宏在 <stddef.h> 或者 <cstddef> 头文件中定义。它主要用于低级系统编程和序列化操作，通过计算地址偏移，可以更灵活地操作结构体中的成员。</p>
+<p>语法</p>
+<h1 id="include">include <stddef.h></h1>
+<p>offsetof(type, member)
+type: 结构体类型。
+member: 需要计算偏移量的结构体成员的名字。</p>
+<h3 id="containerof">containerof</h3>
+<h2 id="_3">封装</h2>
+<h2 id="_4">继承</h2>
+<h2 id="_5">多态</h2>
               
             </div>
           </div><footer>
