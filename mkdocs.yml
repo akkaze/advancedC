@@ -1,0 +1,21 @@
+site_name: C语言高级技巧
+theme: readthedocs
+nav:
+  - 引言: index.md
+  - 重要概念: concepts.md
+  - 重要的宏: macros.md
+  - 面向对象: object_oriented.md
+  - 模板（泛型）: template.md
+  - 错误处理: error_handling.md
+  - 使用宏实现通用vector: macro_vector.md
+  - 使用void*实现通用vector: opaque_pointer_vector.md
+  - 基础BUG: bugs.md
+  - 常用编译器: compiler.md
+  - 构建系统: build_system.md
+  - 测试驱动: test_driven.md
+  - 调试方法: debug.md
+  - 静态检查: static_check.md
+  - 动态分析: dynamic_analysis.md
+  - libc实现浅析: libc.md
+  - 自定义编译器: custom_compiler.md
+  
