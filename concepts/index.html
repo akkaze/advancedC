@@ -48,17 +48,27 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#_2">声明和定义</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#_3">变量的声明和定义</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_4">函数的声明和定义</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_3">声明有关概念</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#_5">传值和传地址</a>
+    <li class="toctree-l4"><a class="reference internal" href="#storage-class">存储类型（storage class）</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#type-specifier">类型说明符（type-specifier）</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#type-qualifier">类型限定符（type-qualifier）</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#_4">类型修饰符</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_5">变量的声明和定义</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_6">函数的声明和定义</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#_7">传值和传地址</a>
     </li>
         </ul>
     </li>
         </ul>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#storage-class">存储类（storage class）</a>
     </li>
     </ul>
                 </li>
@@ -136,16 +146,26 @@
               
                 <h1 id="_1">重要概念</h1>
 <h2 id="_2">声明和定义</h2>
-<p>在C语言中，声明和定义是两个不同的概念。声明通常用来告诉编译器有这么一个变量或者函数的存在，而定义则是创建这个变量或者函数。
+<h3 id="_3">声明有关概念</h3>
+<h4 id="storage-class">存储类型（storage class）</h4>
+<p>存储类是C语言与C++语言的标准中，变量与函数的可访问性(即作用域范围scope)与生存期(life time)。
+存储类可分为<code>auto</code>、<code>register</code>、<code>static</code>、<code>extern</code>、<code>thread_local</code>等。</p>
+<h4 id="type-specifier">类型说明符（type-specifier）</h4>
+<p>如<code>void</code>、<code>char</code>、<code>short</code>、<code>int</code>、结构体类型、枚举类型等</p>
+<h4 id="type-qualifier">类型限定符（type-qualifier）</h4>
+<p>如<code>const</code>、<code>volatile</code>、<code>mutable</code>, <code>restrict</code></p>
+<h4 id="_4">类型修饰符</h4>
+<p><code>unsigned</code> <code>signed</code>
+在C语言中，声明和定义是两个不同的概念。声明通常用来告诉编译器有这么一个变量或者函数的存在，而定义则是创建这个变量或者函数。
 声明可以出现多次，而定义只能有一次。
 声明通常放在头文件里，作为接口文件使用。</p>
-<h3 id="_3">变量的声明和定义</h3>
+<h3 id="_5">变量的声明和定义</h3>
 <p>变量的声明有两种情况：一种是需要建立存储空间的声明，称为定义性声明；另一种是不需要建立存储空间的声明，称为引用性声明。</p>
 <pre><code class="language-c">int a = 1; // 这是变量的定义
 
 extern int a; // 这是变量的声明
 </code></pre>
-<h3 id="_4">函数的声明和定义</h3>
+<h3 id="_6">函数的声明和定义</h3>
 <p>函数的声明通常在头文件中，而定义在.c文件中。</p>
 <pre><code class="language-c">
 // func.h
@@ -157,7 +177,7 @@ int add(int a, int b) { // 函数定义
     return a + b;
 }
 </code></pre>
-<h4 id="_5">传值和传地址</h4>
+<h4 id="_7">传值和传地址</h4>
 <p>在C语言中，函数的参数传递有两种方式：传值和传址。</p>
 <ol>
 <li>传值（Pass by Value）：函数内部对参数进行修改不会影响外部的实参。</li>
@@ -205,9 +225,6 @@ int main() {
 #define OUT
 void add(IN int lhs, IN int rhs, OUT int* res);
 </code></pre>
-<h2 id="storage-class">存储类（storage class）</h2>
-<p>存储类是C语言与C++语言的标准中，变量与函数的可访问性(即作用域范围scope)与生存期(life time)。
-存储类可分为<code>auto</code>、<code>register</code>、<code>static</code>、<code>extern</code>、<code>mutable</code>、<code>thread_local</code>等。</p>
               
             </div>
           </div><footer>
