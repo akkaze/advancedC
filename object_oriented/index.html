@@ -178,6 +178,10 @@ person tom;
   self-&gt;gender = gender;
 }
 
+void set_age(person* self, unsigned int age) {
+  self-&gt;age = age;
+}
+
 set_gender(&amp;tom, MALE);
 </code></pre>
 <h3 id="_4">构造、拷贝、析构函数</h3>
@@ -225,9 +229,37 @@ person_copy(jerry, tom);
 <h3 id="_8">可见性</h3>
 <h2 id="_9">继承</h2>
 <h3 id="_10">单一继承</h3>
+<p>在单继承的情况下，通常将父类作为子类的第一个成员，这样做的原因是，子对象和父对象的首地址是相同的。</p>
+<pre><code class="language-c">typedef man_t {
+  person super;
+  int id;
+} man;
+
+man tom;
+</code></pre>
+<p><code>&amp;tom</code>和<code>&amp;tom.super</code>是同一地址，这样方便转换。
+子类可以很容易的使用父类的方法</p>
+<pre><code class="language-c">void set_age(man* self, unsigned int age) {
+  // 调用父类方法
+  set_age(&amp;self-&gt;super, age);
+}
+</code></pre>
 <h3 id="_11">多继承</h3>
+<pre><code class="language-c">typedef struct object_t {
+  int id;
+} object;
+
+typedef struct man_t {
+  person super1;
+  object super2;
+} man;
+</code></pre>
 <h3 id="_12">向上转换</h3>
+<pre><code class="language-c">object* super = (object*)((char*)someone + offsetof(man, super2)); 
+</code></pre>
 <h3 id="_13">向下转换</h3>
+<pre><code class="language-c">man* someone = (man*)((char*)super - offsetof(man, super2)); 
+</code></pre>
 <h2 id="_14">多态</h2>
 <h3 id="_15">虚函数实现</h3>
 <h3 id="_16">一般性的表驱动</h3>
