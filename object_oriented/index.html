@@ -104,15 +104,15 @@
                 </li>
               </ul>
               <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../error_handling/">错误处理</a>
+                </li>
+              </ul>
+              <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../macro_vector/">使用宏实现通用vector</a>
                 </li>
               </ul>
               <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../opaque_pointer_vector/">使用void*实现通用vector</a>
-                </li>
-              </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../error_handling/">错误处理</a>
                 </li>
               </ul>
               <ul>
@@ -165,12 +165,12 @@
                 <h1 id="_1">面向对象</h1>
 <h2 id="_2">封装</h2>
 <h3 id="_3">抽象</h3>
-<pre><code class="language-c">enum gender_t {
+<pre><code class="language-c">enum gender_s {
   MALE,
   FEMALE
-} gender_s;
-typedef struct person_t {
-  gender_s gender;
+} gender_t;
+typedef struct person_s {
+  gender_t gender;
   unsigned int age;
   const char* name;
 } person;
@@ -190,7 +190,7 @@ set_gender(&amp;tom, MALE);
 </code></pre>
 <h3 id="_4">构造、拷贝、析构函数</h3>
 <h4 id="_5">构造函数</h4>
-<pre><code class="language-c">void person_ctor_by_gender_age_name(person* self, gender_s gender, unsigned int age, const char* name) {
+<pre><code class="language-c">void person_ctor_by_gender_age_name(person* self, gender_t gender, unsigned int age, const char* name) {
   self-&gt;gender = gender;
   self-&gt;age = age;
   self-&gt;name = name;
@@ -234,7 +234,7 @@ person_copy(jerry, tom);
 <h2 id="_9">继承</h2>
 <h3 id="_10">单一继承</h3>
 <p>在单继承的情况下，通常将父类作为子类的第一个成员，这样做的原因是，子对象和父对象的首地址是相同的。</p>
-<pre><code class="language-c">typedef man_t {
+<pre><code class="language-c">typedef man_s {
   person super;
   int id;
 } man;
@@ -249,11 +249,11 @@ man tom;
 }
 </code></pre>
 <h3 id="_11">多继承</h3>
-<pre><code class="language-c">typedef struct object_t {
+<pre><code class="language-c">typedef struct object_s {
   int id;
 } object;
 
-typedef struct man_t {
+typedef struct man_s {
   person super1;
   object super2;
 } man;
@@ -269,7 +269,7 @@ typedef struct man_t {
 <h3 id="_15">虚函数实现</h3>
 <p>这里的技巧和单继承一样，子类在虚继承的时候需将父类作为第一个成员。</p>
 <pre><code class="language-c">typedef void (sound_func_t*)();
-typedef struct animal_t {
+typedef struct animal_s {
   sound_func_t sound;
 } animal;
 
@@ -281,7 +281,7 @@ void animal_ctor(animal* self) {
   self-&gt;sound = animal_sound;
 }
 
-typedef struct dog_t {
+typedef struct dog_s {
   animal super; 
 } dog;
 
@@ -293,7 +293,7 @@ void dog_ctor(dog* self) {
   self-&gt;super.sound = dog_sound;
 }
 
-typedef struct cat_t {
+typedef struct cat_s {
   animal super; 
 } cat;
 
@@ -334,7 +334,7 @@ sound_method sound_methods[] = {
   {NONE, animal_sound}
 }
 
-typedef struct animal_t {
+typedef struct animal_s {
   animal_code code;
 } animal;
 
@@ -342,7 +342,7 @@ void animal_ctor(animal* self) {
   self-&gt;code = NONE;
 }
 
-typedef struct dog_t {
+typedef struct dog_s {
   animal_code code;
 } dog;
 
@@ -350,7 +350,7 @@ void dog_ctor(dog* self) {
   self-&gt;code = DOG;
 }
 
-typedef struct cat_t {
+typedef struct cat_s {
   animal_code code;
 } cat;
 
