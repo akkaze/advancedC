@@ -261,8 +261,126 @@ typedef struct man_t {
 <pre><code class="language-c">man* someone = (man*)((char*)super - offsetof(man, super2)); 
 </code></pre>
 <h2 id="_14">多态</h2>
+<p>在编程语言和类型论中，多态（英语：polymorphism）指为不同数据类型的实体提供统一的接口。 多态类型（英语：polymorphic type）可以将自身所支持的操作套用到其它类型的值上。</p>
 <h3 id="_15">虚函数实现</h3>
+<p>这里的技巧和单继承一样，子类在虚继承的时候需将父类作为第一个成员。</p>
+<pre><code class="language-c">typedef void (sound_func_t*)();
+typedef struct animal_t {
+  sound_func_t sound;
+} animal;
+
+void animal_sound() {
+  printf(&quot;~~~\n&quot;);
+}
+
+void animal_ctor(animal* self) {
+  self-&gt;sound = animal_sound;
+}
+
+typedef struct dog_t {
+  animal super; 
+} dog;
+
+void dog_sound() {
+  printf(&quot;wow\n&quot;);
+}
+
+void dog_ctor(dog* self) {
+  self-&gt;super.sound = dog_sound;
+}
+
+typedef struct cat_t {
+  animal super; 
+} cat;
+
+void cat_sound() {
+  printf(&quot;meow\n&quot;);
+}
+
+void cat_ctor(cat* self) {
+  cat-&gt;super.sound = cat_sound;
+}
+</code></pre>
+<pre><code class="language-c">animal* tom = (animal*)NEW_CAT();
+animal* spike = (animal*)NEW_DOG();
+tom-&gt;sound();
+spike-&gt;sound();
+// 这个时候已经不知道tom和spike的具体类型了，因为可能是在另一个函数里调用的
+DEL_ANIMAL(tom);
+DEL_ANIMAL(spike);
+</code></pre>
 <h3 id="_16">一般性的表驱动</h3>
+<p>这里的关键是定义type_code，并让它作为所有子类的第一个成员，这相当于c++的type_info，但是在内存占用上更优，如果对象非常多，这也是不小的优化。比如在渲染引擎中，dom元素会发出多，每一个都持有虚表指针，这样会造成浪费。type_code可以在不同的表之间共用，这也是它的优势。</p>
+<pre><code class="language-c">typedef void* animal_handle;
+typedef enum {
+  DOG,
+  CAT,
+  NONE
+} animal_code;
+
+typedef struct {
+  animal_code code;
+  sound_func_t sound;
+} sound_method;
+
+
+sound_method sound_methods[] = {
+  {DOG, dog_sound},
+  {CAT, cat_sound},
+  {NONE, animal_sound}
+}
+
+typedef struct animal_t {
+  animal_code code;
+} animal;
+
+void animal_ctor(animal* self) {
+  self-&gt;code = NONE;
+}
+
+typedef struct dog_t {
+  animal_code code;
+} dog;
+
+void dog_ctor(dog* self) {
+  self-&gt;code = DOG;
+}
+
+typedef struct cat_t {
+  animal_code code;
+} cat;
+
+void cat_ctor(cat* self) {
+  self-&gt;code = CAT;
+}
+
+#define LOOKUP_SOUND_METHOD(code) ({      \
+  sound_func_t __sound = NULL;            \
+  for (unsigned int i = 0u; i &lt; sizeof(sound_methods) / sizeof(sound_methods[0]); i++) {  \
+    if (sound_methouds[i].code == code) { \
+      __sound = sound_methods[i].soound;  \
+      break;                              \
+    }                                     \        
+  }                                       \
+  __sound;                                \
+})
+
+#define CALL_SOUND_METHOD(handle) {                   \
+  animal_code __code = *(animal_code*)handle;         \
+  sound_func_t __sound = LOOKUP_SOUND_METHOD(__code); \
+  __sound();                                          \ 
+}
+这里有一点非常重要，在虚继承的情况下
+```c
+animal_handle tom = (animal_handle)NEW_CAT();
+animal_handle spike = (animal_handle)NEW_DOG();
+CALL_SOUND_METHOD(tom);
+CALL_SOUND_METHOD(spike);
+// 这个时候已经不知道tom和spike的具体类型了，因为可能是在另一个函数里调用的
+DEL_ANIMAL(tom);
+DEL_ANIMAL(spike);
+</code></pre>
+<p>```</p>
 <h3 id="_17">虚表实现</h3>
               
             </div>
