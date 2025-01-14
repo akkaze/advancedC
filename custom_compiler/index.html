@@ -5,15 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../img/favicon.ico" />
-    <title>模板（泛型） - C语言高级技巧</title>
+    <title>自定义编译器 - C语言高级技巧</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "\u6a21\u677f\uff08\u6cdb\u578b\uff09";
-        var mkdocs_page_input_path = "template.md";
+        var mkdocs_page_name = "\u81ea\u5b9a\u4e49\u7f16\u8bd1\u5668";
+        var mkdocs_page_input_path = "custom_compiler.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -51,20 +51,8 @@
                 <li class="toctree-l1"><a class="reference internal" href="../object_oriented/">面向对象</a>
                 </li>
               </ul>
-              <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href="#">模板（泛型）</a>
-    <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#_2">使用宏实现模板</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#_3">使用不透明指针实现模板</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#_4">什么是不透明指针？</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#_5">侵入式容器</a>
-    </li>
-    </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../template/">模板（泛型）</a>
                 </li>
               </ul>
               <ul>
@@ -99,8 +87,14 @@
                 <li class="toctree-l1"><a class="reference internal" href="../dynamic_analysis/">动态分析</a>
                 </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../custom_compiler/">自定义编译器</a>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">自定义编译器</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#_2">抽象语法树</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#pycparser">pycparser</a>
+    </li>
+    </ul>
                 </li>
               </ul>
       </div>
@@ -117,7 +111,7 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
-      <li class="breadcrumb-item active">模板（泛型）</li>
+      <li class="breadcrumb-item active">自定义编译器</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -126,61 +120,14 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="_1">模板</h1>
-<h2 id="_2">使用宏实现模板</h2>
-<pre><code class="language-c">#define DECL_ADD(type) \
-  void add_##type(type* dst, type* lhs, type* rhs, unsigned int num);
-#define IMPL_ADD(type) \
-  void add_##type(type* dst, type* lhs, type* rhs, unsigned int num) { \
-    for (unsinged int i = 0; i &lt; num; i++) { \
-      dst[i] = lhs[i] + rhs[i]; \
-    } \
-  }
-#define CALL_ADD(type) add_##type
-</code></pre>
-<pre><code class="language-c">DECL_ADD(int);
-DECL_ADD(float);
-</code></pre>
-<pre><code class="language-c">IMPL_ADD(int);
-IMPL_ADD(float);
-</code></pre>
-<pre><code class="language-c">CALL_ADD(int)(dst, lhs, rhs, num);
-CALL_ADD(float)(dst, lhs, rhs, num);
-</code></pre>
-<h2 id="_3">使用不透明指针实现模板</h2>
-<h3 id="_4">什么是不透明指针？</h3>
-<p>顾名思义，不透明是我们看不到的。例如，木材是不透明的。不透明指针是指向数据结构的指针，该数据结构的内容在定义之时不公开。
-在泛型的实现里，我们使用void*来实现不透明指针，因为它可以指向任何内存，而不用关心具体的类型，这正是泛型所需要的。</p>
-<pre><code class="language-c">typedef void (add_functor*)(void*,  void* , void* );
-void add(void* dst, void* lhs, void* rhs, unsigned int num, unsigned int elem_size, add_functor functor) {
-  char* dst_p = (char*)dst;
-  char* lhs_p = (char*)lhs;
-  char* rhs_p = (char*)rhs;
-  for (unsigned int i = 0; i &lt; num; i++) {
-    functor(dst_p, lhs_p, rhs_p);
-    dst_p += elem_size;
-    lhs_p += elem_size;
-    rhs_p += elem_size;
-  }
-}
-</code></pre>
-<pre><code class="language-c">void add_int_functor(void* dst, void* lhs, void* rhs) {
-  *(int*)dst = *(int*)lhs + *(int*)rhs; 
-}
-void add_float_functor(void* dst, void* lhs, void* rhs) {
-  *(float*)dst = *(float*)lhs + *(float*)rhs; 
-}
-</code></pre>
-<pre><code class="language-c">add(dst, lhs, rhs, num, sizeof(int), add_int_functor);
-add(dst, lhs, rhs, num, sizeof(float), add_float_functor);
-</code></pre>
-<h2 id="_5">侵入式容器</h2>
+                <h1 id="_1">自定义编译器</h1>
+<h2 id="_2">抽象语法树</h2>
+<h2 id="pycparser">pycparser</h2>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../object_oriented/" class="btn btn-neutral float-left" title="面向对象"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../macro_vector/" class="btn btn-neutral float-right" title="使用宏实现通用vector">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../dynamic_analysis/" class="btn btn-neutral float-left" title="动态分析"><span class="icon icon-circle-arrow-left"></span> Previous</a>
     </div>
 
   <hr/>
@@ -203,10 +150,8 @@ add(dst, lhs, rhs, num, sizeof(float), add_float_functor);
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../object_oriented/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../dynamic_analysis/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
-    
-      <span><a href="../macro_vector/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

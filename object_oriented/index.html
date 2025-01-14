@@ -51,16 +51,80 @@
                 <li class="toctree-l1 current"><a class="reference internal current" href="#">面向对象</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#_2">封装</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_3">抽象</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#_3">继承</a>
+    <li class="toctree-l3"><a class="reference internal" href="#selfthis">self/this 指针</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#_4">多态</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_4">构造、拷贝、析构函数</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_5">可见性</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_6">继承</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_7">单一继承</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_8">多继承</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_9">向上转换</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_10">向下转换</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_11">多态</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_12">虚函数实现</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_13">一般性的表驱动</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_14">虚表实现</a>
+    </li>
+        </ul>
     </li>
     </ul>
                 </li>
               </ul>
               <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../template/">模板（泛型）</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../macro_vector/">使用宏实现通用vector</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../opaque_pointer_vector/">使用透明指针实现通用vector</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../error_handling/">错误处理</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../bugs/">基础BUG</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../build_system/">构建系统</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../test_driven/">测试驱动</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../static_check/">静态检查</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../dynamic_analysis/">动态分析</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../custom_compiler/">自定义编译器</a>
                 </li>
               </ul>
       </div>
@@ -88,8 +152,37 @@
               
                 <h1 id="_1">面向对象</h1>
 <h2 id="_2">封装</h2>
-<h2 id="_3">继承</h2>
-<h2 id="_4">多态</h2>
+<h3 id="_3">抽象</h3>
+<pre><code class="language-c">enum gender_t {
+  male,
+  female
+};
+typedef struct person_t {
+  enum gender_t gender;
+  unsigned int age;
+  const char* name;
+} person;
+
+person tom;
+</code></pre>
+<h3 id="selfthis">self/this 指针</h3>
+<pre><code class="language-c">void set_gender(person* self, enum geneder_t gender) {
+  self-&gt;gender = gender;
+}
+
+set_gender(&amp;tom, male);
+</code></pre>
+<h3 id="_4">构造、拷贝、析构函数</h3>
+<h3 id="_5">可见性</h3>
+<h2 id="_6">继承</h2>
+<h3 id="_7">单一继承</h3>
+<h3 id="_8">多继承</h3>
+<h3 id="_9">向上转换</h3>
+<h3 id="_10">向下转换</h3>
+<h2 id="_11">多态</h2>
+<h3 id="_12">虚函数实现</h3>
+<h3 id="_13">一般性的表驱动</h3>
+<h3 id="_14">虚表实现</h3>
               
             </div>
           </div><footer>
