@@ -370,9 +370,9 @@ void cat_ctor(cat* self) {
   sound_func_t __sound = LOOKUP_SOUND_METHOD(__code); \
   __sound();                                          \ 
 }
-这里有一点非常重要，在虚继承的情况下
-```c
-animal_handle tom = (animal_handle)NEW_CAT();
+</code></pre>
+<p>这里有一点非常重要，在虚继承的情况下</p>
+<pre><code class="language-c">animal_handle tom = (animal_handle)NEW_CAT();
 animal_handle spike = (animal_handle)NEW_DOG();
 CALL_SOUND_METHOD(tom);
 CALL_SOUND_METHOD(spike);
@@ -380,7 +380,6 @@ CALL_SOUND_METHOD(spike);
 DEL_ANIMAL(tom);
 DEL_ANIMAL(spike);
 </code></pre>
-<p>```</p>
 <h3 id="_17">虚表实现</h3>
               
             </div>
