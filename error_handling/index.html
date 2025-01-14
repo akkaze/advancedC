@@ -148,7 +148,7 @@ status_code divide(int a, int b, int *result) {
 int main() {
   int result;
   status_code code = divide(10, 0, &amp;result);
-  if (ret == E_SUCC) {
+  if (code == E_SUCC) {
     printf(&quot;Result: %d\n&quot;, result);
   } else {
     printf(&quot;Error: %d\n&quot;, code);
@@ -166,15 +166,17 @@ int main() {
   FILE* fp = NULL;
   status_code code = E_SUCC;
   result = (int*)malloc(sizeof(int));
+  if (!result) goto cleanup;
   fp = fopen(&quot;log.txt&quot;, &quot;w&quot;);
+  if (!fp) goto cleanup;
   code = divide(10, 0, result);
-  if (ret == E_SUCC) {
+  if (code == E_SUCC) {
     fprintf(fp, &quot;Result: %d\n&quot;, *result);
   } else {
-    fprintf(fp, &quot;Error: %d\n&quot;, code);
     goto cleanup;
   }
 cleanup:
+  fprintf(stderr, &quot;Error: %d\n&quot;, code);
   if (result) free(result);
   if (fp) fclose(fp);
   // 最后返回code
@@ -183,6 +185,40 @@ cleanup:
 </code></pre>
 <h2 id="trycatchcheck">TRY/CATCH/CHECK宏</h2>
 <p>为了简化上面的流程，我们定义几个宏</p>
+<pre><code class="language-c">#define TRY
+#define CATCH cleanup:
+#define CHECK(...) {                                                           \
+  code = __VA_ARGS__;                                                          \
+  if (code != E_SUCC) {                                                        \  
+    fprintf(stderr, &quot;%s %s:%u code: %d&quot;, __FUNC__, __FILE__, __LINE__, code);  \
+    goto cleanup;                                                              \
+  }                                                                            \
+}
+#define CHECK_NONULL(ptr) if (!(ptr)) goto cleanup;
+</code></pre>
+<pre><code class="language-c">int main() {
+  int* result = NULL;
+  FILE* fp = NULL;
+  status_code code = E_SUCC;
+  TRY {
+    result = (int*)malloc(sizeof(int));
+    CHECK_NONNULL(result);
+    fp = fopen(&quot;log.txt&quot;, &quot;w&quot;);
+    CHECK_NONNULL(fp);
+    CHECK(divide(10, 0, result));
+    // 已经检查过，无需检查
+    fprintf(fp, &quot;Result: %d\n&quot;, *result);
+  }
+  CATCH {
+    if (result) free(result);
+    if (fp) fclose(fp);
+    // 最后返回code
+    return code;
+  }
+  // 防止warning
+  return 0;
+}
+</code></pre>
 <h2 id="setjumplongjump">setjump/longjump</h2>
               
             </div>
