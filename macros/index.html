@@ -50,9 +50,9 @@
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#offsetof_1">offsetof的实现</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#offsetgcc">offset在gcc下的实现</a>
+    <li class="toctree-l4"><a class="reference internal" href="#offsetofgcc">offsetof在gcc下的实现</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#offsetmsvc">offset在msvc下的实现</a>
+    <li class="toctree-l4"><a class="reference internal" href="#offsetofmsvc">offsetof在msvc下的实现</a>
     </li>
         </ul>
     </li>
@@ -62,11 +62,11 @@
     </li>
         </ul>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#containerof">containerof</a>
+    <li class="toctree-l2"><a class="reference internal" href="#container_of">container_of</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#containerof_1">containerof的实现</a>
+    <li class="toctree-l3"><a class="reference internal" href="#container_of_1">container_of的实现</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#container_of">container_of的示例</a>
+    <li class="toctree-l3"><a class="reference internal" href="#container_of_2">container_of的示例</a>
     </li>
         </ul>
     </li>
@@ -153,11 +153,11 @@ offsetof(type, member)
 <li><code>member</code>: 需要计算偏移量的结构体成员的名字。</li>
 </ul>
 <h3 id="offsetof_1">offsetof的实现</h3>
-<h4 id="offsetgcc">offset在gcc下的实现</h4>
+<h4 id="offsetofgcc">offsetof在gcc下的实现</h4>
 <pre><code class="language-c">#define offsetof(type, member) ((size_t) &amp;((type *)0)-&gt;member)
 </code></pre>
 <p>这个定义直接通过解引用空指针来访问成员变量m的地址，然后计算偏移量。由于C语言允许这种操作，这种实现方式在实际应用中可以正常工作，但存在潜在的风险，因为对空指针的解引用是不安全的‌</p>
-<h4 id="offsetmsvc">offset在msvc下的实现</h4>
+<h4 id="offsetofmsvc">offsetof在msvc下的实现</h4>
 <pre><code class="language-c">#define offsetof(s,m) ((size_t)&amp;reinterpret_cast&lt;char const volatile&amp;&gt;((((s*)0)-&gt;m)))
 </code></pre>
 <p>在ANSI C中, <code>&amp;((st *)(0))-&gt;m</code>不会对<code>0(NULL)</code>真正的进行解引用, 而会直接返回m的地址, 这样就避免了对NULL解引用会造成的段错误. 而在c++中, 并没有这样的规则, 所以如果想ANSI C这样实现<code>offsetof</code>会引起段错误. 也知道char*是各种type中standard里唯一保证过sizeof是1, 其它都是implemention dependent.</p>
@@ -193,14 +193,11 @@ int main() {
     return 0;
 }
 </code></pre>
-<h2 id="containerof">containerof</h2>
+<h2 id="container_of">container_of</h2>
 <p><code>‌container_of‌</code>是一个在Linux内核中广泛使用的宏定义，主要用于通过结构体成员的地址来获取该结构体的地址。其定义如下：</p>
-<h3 id="containerof_1">containerof的实现</h3>
+<h3 id="container_of_1">container_of的实现</h3>
 <pre><code class="language-c">#define container_of(ptr, type, member) ({ \
     void *__mptr = (void *)(ptr); \
-    BUILD_BUG_ON_MSG(!__same_type(*(ptr), ((type *)0)-&gt;member) &amp;&amp; \
-    !__same_type(*(ptr), void), \
-    &quot;pointer type mismatch in container_of()&quot;); \
     ((type *)(__mptr - offsetof(type, member))); \
 })
 </code></pre>
@@ -217,7 +214,7 @@ container_of宏接受三个参数：</p>
 <li>‌计算偏移量‌：使用offsetof宏计算成员member在结构体中的偏移量。</li>
 <li>‌指针转换‌：最后，通过减去偏移量来计算结构体的地址，并将其转换为正确的类型。</li>
 </ol>
-<h3 id="container_of">container_of的示例</h3>
+<h3 id="container_of_2">container_of的示例</h3>
 <p>假设有一个结构体struct foo，其中包含一个成员变量bar，可以通过以下方式使用container_of：</p>
 <pre><code class="language-c">struct foo {
     int bar;

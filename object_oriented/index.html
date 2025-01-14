@@ -57,30 +57,38 @@
     <li class="toctree-l3"><a class="reference internal" href="#selfthis">self/this 指针</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#_4">构造、拷贝、析构函数</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#_5">构造函数</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_5">可见性</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_6">析构函数</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#_7">拷贝函数</a>
     </li>
         </ul>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#_6">继承</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#_7">单一继承</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_8">多继承</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_9">向上转换</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_10">向下转换</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_8">可见性</a>
     </li>
         </ul>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#_11">多态</a>
+    <li class="toctree-l2"><a class="reference internal" href="#_9">继承</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#_12">虚函数实现</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_10">单一继承</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_13">一般性的表驱动</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_11">多继承</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_14">虚表实现</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_12">向上转换</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_13">向下转换</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_14">多态</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_15">虚函数实现</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_16">一般性的表驱动</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_17">虚表实现</a>
     </li>
         </ul>
     </li>
@@ -154,11 +162,11 @@
 <h2 id="_2">封装</h2>
 <h3 id="_3">抽象</h3>
 <pre><code class="language-c">enum gender_t {
-  male,
-  female
-};
+  MALE,
+  FEMALE
+} gender_s;
 typedef struct person_t {
-  enum gender_t gender;
+  gender_s gender;
   unsigned int age;
   const char* name;
 } person;
@@ -166,23 +174,64 @@ typedef struct person_t {
 person tom;
 </code></pre>
 <h3 id="selfthis">self/this 指针</h3>
-<pre><code class="language-c">void set_gender(person* self, enum geneder_t gender) {
+<pre><code class="language-c">void set_gender(person* self, geneder_s gender) {
   self-&gt;gender = gender;
 }
 
-set_gender(&amp;tom, male);
+set_gender(&amp;tom, MALE);
 </code></pre>
 <h3 id="_4">构造、拷贝、析构函数</h3>
-<h3 id="_5">可见性</h3>
-<h2 id="_6">继承</h2>
-<h3 id="_7">单一继承</h3>
-<h3 id="_8">多继承</h3>
-<h3 id="_9">向上转换</h3>
-<h3 id="_10">向下转换</h3>
-<h2 id="_11">多态</h2>
-<h3 id="_12">虚函数实现</h3>
-<h3 id="_13">一般性的表驱动</h3>
-<h3 id="_14">虚表实现</h3>
+<h4 id="_5">构造函数</h4>
+<pre><code class="language-c">void person_ctor_by_gender_age_name(person* self, gender_s gender, unsigned int age, const char* name) {
+  self-&gt;gender = gender;
+  self-&gt;age = age;
+  self-&gt;name = name;
+}
+
+// 使用构造函数
+#define NEW_PERSON_BY_GENDER_AGE_NAME(gender, age, name) ({   \
+  person* someone = (person*)malloc(sizeof(person));          \
+  person_ctor_by_gender_age_name(someone, gender, age, name); \
+  someone;                                                    \
+})
+
+person* tom = NEW_PERSON_BY_GENDER_AGE_NAME(MALE, 18, &quot;tom&quot;);
+</code></pre>
+<h4 id="_6">析构函数</h4>
+<p>析构函数除了self指针通常没有参数。值得注意的是，由于C语言没有rtti，析构函数必须手动调用。</p>
+<pre><code class="language-c">void person_dtor(person* self) {
+  printf(&quot;person destructor\n&quot;);
+}
+
+// 使用析构函数
+#define DEL_PERSON(someone) { \
+  person_dtor(someone);       \
+  free(someone);              \
+} 
+
+DEL_PERSON(tom);
+</code></pre>
+<h4 id="_7">拷贝函数</h4>
+<p>拷贝函数通常接受两个参数，一个为目的结构体的指针，另一个是源结构体的指针</p>
+<pre><code class="language-c">void person_copy(person* dst, person* src) {
+  dst-&gt;gender = src-&gt;gender;
+  dst-&gt;age = src-&gt;age;
+  dst-&gt;name = src-&gt;name;
+}
+
+person* jerry = ...;
+person_copy(jerry, tom);
+</code></pre>
+<h3 id="_8">可见性</h3>
+<h2 id="_9">继承</h2>
+<h3 id="_10">单一继承</h3>
+<h3 id="_11">多继承</h3>
+<h3 id="_12">向上转换</h3>
+<h3 id="_13">向下转换</h3>
+<h2 id="_14">多态</h2>
+<h3 id="_15">虚函数实现</h3>
+<h3 id="_16">一般性的表驱动</h3>
+<h3 id="_17">虚表实现</h3>
               
             </div>
           </div><footer>
