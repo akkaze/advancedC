@@ -64,19 +64,19 @@
                 </li>
               </ul>
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../opaque_pointer_vector/">使用透明指针实现通用vector</a>
+                <li class="toctree-l1"><a class="reference internal" href="../opaque_pointer_vector/">使用void*实现通用vector</a>
                 </li>
               </ul>
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="#">错误处理</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#_2">错误码</a>
+    <li class="toctree-l2"><a class="reference internal" href="#_2">使用返回值和错误码</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#goto">使用goto</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#setjumplongjump">setjump/longjump</a>
+    <li class="toctree-l2"><a class="reference internal" href="#trycatchcheck">TRY/CATCH/CHECK宏</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#trycatch">TRY/CATCH宏</a>
+    <li class="toctree-l2"><a class="reference internal" href="#setjumplongjump">setjump/longjump</a>
     </li>
     </ul>
                 </li>
@@ -129,15 +129,66 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="_1">错误处理</h1>
-<h2 id="_2">错误码</h2>
+<h2 id="_2">使用返回值和错误码</h2>
+<pre><code class="language-c">typedef enum {
+  E_SUCC = 0,
+  E_DOM,
+  E_OVERLOW,
+  E_END
+} status_code;
+// 也可以返回int，因为枚举可以转换为int
+status_code divide(int a, int b, int *result) {
+  if (b == 0) {
+    return E_DOM;   // 返回错误码
+  }
+  *result = a / b;
+  return E_SUCC;
+}
+
+int main() {
+  int result;
+  status_code code = divide(10, 0, &amp;result);
+  if (ret == E_SUCC) {
+    printf(&quot;Result: %d\n&quot;, result);
+  } else {
+    printf(&quot;Error: %d\n&quot;, code);
+    // 错误码要一直向上返回，直到作为进程返回值
+    return code;
+  }
+  return 0;
+}
+</code></pre>
 <h2 id="goto">使用goto</h2>
+<p>在上面的例子中，调用divide的函数之前并没有申请任何资源，如果申请资源，需要在return之前释放掉这些资源，注意需要在所有return之前释放掉这些资源，但是一旦程序结构变得非常复杂，return会非常做，这样会变得非常难以维护，所以通常在函数最后统一返回，一旦遇到错误就跳到函数最后的block里。
+注意，因为使用了goto，函数作用域内的变量定义最好放在函数头部。因为ANSI C不允许在goto之后定义变量。</p>
+<pre><code class="language-c">int main() {
+  int* result = NULL;
+  FILE* fp = NULL;
+  status_code code = E_SUCC;
+  result = (int*)malloc(sizeof(int));
+  fp = fopen(&quot;log.txt&quot;, &quot;w&quot;);
+  code = divide(10, 0, result);
+  if (ret == E_SUCC) {
+    fprintf(fp, &quot;Result: %d\n&quot;, *result);
+  } else {
+    fprintf(fp, &quot;Error: %d\n&quot;, code);
+    goto cleanup;
+  }
+cleanup:
+  if (result) free(result);
+  if (fp) fclose(fp);
+  // 最后返回code
+  return code;
+}
+</code></pre>
+<h2 id="trycatchcheck">TRY/CATCH/CHECK宏</h2>
+<p>为了简化上面的流程，我们定义几个宏</p>
 <h2 id="setjumplongjump">setjump/longjump</h2>
-<h2 id="trycatch">TRY/CATCH宏</h2>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../opaque_pointer_vector/" class="btn btn-neutral float-left" title="使用透明指针实现通用vector"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../opaque_pointer_vector/" class="btn btn-neutral float-left" title="使用void*实现通用vector"><span class="icon icon-circle-arrow-left"></span> Previous</a>
         <a href="../bugs/" class="btn btn-neutral float-right" title="基础BUG">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 

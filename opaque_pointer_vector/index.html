@@ -5,14 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../img/favicon.ico" />
-    <title>使用透明指针实现通用vector - C语言高级技巧</title>
+    <title>使用void*实现通用vector - C语言高级技巧</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "\u4f7f\u7528\u900f\u660e\u6307\u9488\u5b9e\u73b0\u901a\u7528vector";
+        var mkdocs_page_name = "\u4f7f\u7528void*\u5b9e\u73b0\u901a\u7528vector";
         var mkdocs_page_input_path = "opaque_pointer_vector.md";
         var mkdocs_page_url = null;
       </script>
@@ -64,7 +64,11 @@
                 </li>
               </ul>
               <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href="#">使用透明指针实现通用vector</a>
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">使用void*实现通用vector</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#icd">icd函数</a>
+    </li>
+    </ul>
                 </li>
               </ul>
               <ul>
@@ -109,7 +113,7 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
-      <li class="breadcrumb-item active">使用透明指针实现通用vector</li>
+      <li class="breadcrumb-item active">使用void*实现通用vector</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -118,7 +122,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                
+                <h1 id="voidvector">使用void*实现通用vector</h1>
+<h2 id="icd">icd函数</h2>
+<pre><code class="language-c">typedef (init_func_t*)(void*);
+typedef (copy_func_t*)(void*, void*);
+typedef (dtor_func_t*)(void*);
+
+typedef struct icd_s {
+  size_t size;
+  init_func_t init;
+  copy_func_t copy;
+  dtor_func_t dtor;
+} icd_t;
+</code></pre>
+<pre><code class="language-c">typedef struct vector_s {
+  void *data; 
+  size_t begin_idx;
+  size_t size;
+  size_t capacity;
+  // element的icd函数
+  icd_t icd;
+} vector;
+
+size_t vector_size(vector* vec) {
+  return vec-&gt;size;
+}
+size_t vector_begin_idx(vector* vec) {
+  return vec-&gt;begin_idx;
+}
+</code></pre>
               
             </div>
           </div><footer>

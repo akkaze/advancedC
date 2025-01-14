@@ -90,7 +90,7 @@
                 </li>
               </ul>
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../opaque_pointer_vector/">使用透明指针实现通用vector</a>
+                <li class="toctree-l1"><a class="reference internal" href="../opaque_pointer_vector/">使用void*实现通用vector</a>
                 </li>
               </ul>
               <ul>
@@ -146,6 +146,9 @@
               
                 <h1 id="_1">重要概念</h1>
 <h2 id="_2">声明和定义</h2>
+<p>在C语言中，声明和定义是两个不同的概念。声明通常用来告诉编译器有这么一个变量或者函数的存在，而定义则是创建这个变量或者函数。
+声明可以出现多次，而定义只能有一次。
+声明通常放在头文件里，作为接口文件使用。</p>
 <h3 id="_3">声明有关概念</h3>
 <h4 id="storage-class">存储类型（storage class）</h4>
 <p>存储类是C语言与C++语言的标准中，变量与函数的可访问性(即作用域范围scope)与生存期(life time)。
@@ -153,12 +156,9 @@
 <h4 id="type-specifier">类型说明符（type-specifier）</h4>
 <p>如<code>void</code>、<code>char</code>、<code>short</code>、<code>int</code>、结构体类型、枚举类型等</p>
 <h4 id="type-qualifier">类型限定符（type-qualifier）</h4>
-<p>如<code>const</code>、<code>volatile</code>、<code>mutable</code>, <code>restrict</code></p>
+<p>如<code>const</code>、<code>volatile</code>、<code>restrict</code></p>
 <h4 id="_4">类型修饰符</h4>
-<p><code>unsigned</code> <code>signed</code>
-在C语言中，声明和定义是两个不同的概念。声明通常用来告诉编译器有这么一个变量或者函数的存在，而定义则是创建这个变量或者函数。
-声明可以出现多次，而定义只能有一次。
-声明通常放在头文件里，作为接口文件使用。</p>
+<p><code>unsigned</code> <code>signed</code></p>
 <h3 id="_5">变量的声明和定义</h3>
 <p>变量的声明有两种情况：一种是需要建立存储空间的声明，称为定义性声明；另一种是不需要建立存储空间的声明，称为引用性声明。</p>
 <pre><code class="language-c">int a = 1; // 这是变量的定义

@@ -61,10 +61,12 @@
               </ul>
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="#">使用宏实现通用vector</a>
+    <ul class="current">
+    </ul>
                 </li>
               </ul>
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../opaque_pointer_vector/">使用透明指针实现通用vector</a>
+                <li class="toctree-l1"><a class="reference internal" href="../opaque_pointer_vector/">使用void*实现通用vector</a>
                 </li>
               </ul>
               <ul>
@@ -118,13 +120,229 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                
+                <h1 id="vector">使用宏实现通用vector</h1>
+<p>vector_decl.h</p>
+<pre><code class="language-c">#ifndef CTL_VEC_MINIMAL_SIZE
+#define CTL_VEC_MINIMAL_SIZE 8
+#endif
+#ifndef CTL_VEC_GROW_FACTOR
+#define CTL_VEC_GROW_FACTOR 2
+#endif
+#ifndef CTL_VEC_TRIM_RATIO
+#define CTL_VEC_TRIM_RATIO 0.5
+#endif
+
+#define DECL_VEC(TYPE) \
+typedef struct { \
+  TYPE *data; \
+  size_t begin_idx; \
+  size_t size; \
+  size_t capacity; \
+} ctl_vec_##TYPE; \
+DECL_RES_P(ctl_vec_##TYPE); \
+size_t ctl_vec_##TYPE##_size(ctl_vec_##TYPE* vec); \
+size_t ctl_vec_##TYPE##_begin_idx(ctl_vec_##TYPE* vec); \
+ctl_res_ctl_vec_##TYPE##_p ctl_vec_##TYPE##_new(size_t size); \
+ctl_res_void ctl_vec_##TYPE##_free(ctl_vec_##TYPE *vec); \
+ctl_res_void ctl_vec_##TYPE##_ctor_by_size(ctl_vec_##TYPE *vec, size_t size); \
+ctl_res_void ctl_vec_##TYPE##_ctor(ctl_vec_##TYPE *vec); \
+ctl_res_void ctl_vec_##TYPE##_dtor(ctl_vec_##TYPE *vec); \
+ctl_res_void ctl_vec_##TYPE##_copy(ctl_vec_##TYPE *dst, const ctl_vec_##TYPE *src); \
+ctl_res_void ctl_vec_##TYPE##_set_at(ctl_vec_##TYPE *vec, size_t index, const TYPE data); \
+ctl_res_##TYPE ctl_vec_##TYPE##_get_at(ctl_vec_##TYPE *vec, size_t index); \
+ctl_res_void ctl_vec_##TYPE##_push_back(ctl_vec_##TYPE *vec, const TYPE data); \
+ctl_res_##TYPE ctl_vec_##TYPE##_pop_back(ctl_vec_##TYPE* vec); \
+ctl_res_void ctl_vec_##TYPE##_reserve(ctl_vec_##TYPE* vec, size_t new_capacity); \
+ctl_res_void ctl_vec_##TYPE##_resize(ctl_vec_##TYPE* vec, size_t new_size); 
+</code></pre>
+<p>vector_impl.h</p>
+<pre><code class="language-c">#define IMPL_QUAL_VEC(TYPE, QUAL) \
+QUAL size_t ctl_vec_##TYPE##_size(ctl_vec_##TYPE* vec) { \
+  return vec-&gt;size; \
+} \
+QUAL size_t ctl_vec_##TYPE##_begin_idx(ctl_vec_##TYPE* vec) { \
+  return vec-&gt;begin_idx; \
+} \
+QUAL ctl_res_void ctl_vec_##TYPE##_ctor_with_size(ctl_vec_##TYPE *vec, size_t size) { \
+  ctl_res_void res_void = {0}; \
+  res_void.ec = EOK; \
+  vec-&gt;begin_idx = 0; \
+  vec-&gt;size = size; \
+  vec-&gt;capacity = size; \
+  vec-&gt;data = (TYPE *)malloc(vec-&gt;capacity * sizeof(TYPE)); \
+  /* 初始化就要初始化所有分配的内存 */  \
+  for (size_t idx = 0; idx &lt; vec-&gt;capacity; idx++) { \
+    CHECK_EXEC_RES_RET_RES(TYPE##_ctor(vec-&gt;data + idx), res_void, res_void); \
+  } \
+  return res_void; \
+} \
+QUAL ctl_res_void ctl_vec_##TYPE##_ctor(ctl_vec_##TYPE *vec) { \
+  ctl_res_void res = {0}; \
+  res.ec = EOK; \
+  CHECK_EXEC_RES_RET_RES(ctl_vec_##TYPE##_ctor_with_size(vec, CTL_VEC_MINIMAL_SIZE), res, res) ; \
+  return res; \
+} \
+QUAL ctl_res_void ctl_vec_##TYPE##_dtor(ctl_vec_##TYPE *vec) { \
+  ctl_res_void res = {0}; \
+  res.ec = EOK; \
+  /* 销毁就要销毁所有分配的内存 */ \
+  for (size_t idx = 0; idx &lt; vec-&gt;capacity; idx++) { \
+    CHECK_EXEC_RES_RET_RES(TYPE##_dtor(vec-&gt;data + idx), res, res); \
+  } \
+  free(vec-&gt;data); \
+  vec-&gt;data = NULL; \
+  return res; \
+} \
+QUAL ctl_res_ctl_vec_##TYPE##_p ctl_vec_##TYPE##_new(size_t size) { \
+  ctl_res_ctl_vec_##TYPE##_p res = {0}; \
+  res.ec = EOK; \
+  ctl_res_void res_void = {0}; \
+  res_void.ec = EOK; \
+  ctl_vec_##TYPE *vec = (ctl_vec_##TYPE *)malloc(sizeof(ctl_vec_##TYPE)); \
+  CHECK_COND_RET_RES(NULL != vec, EOOM, res); \
+  res.value = vec; \
+  CHECK_EXEC_RES_POSTPROC_RET_RES(ctl_vec_##TYPE##_ctor_with_size(res.value, size), res_void, res, free(vec)); \
+  return res; \
+} \
+QUAL ctl_res_void ctl_vec_##TYPE##_free(ctl_vec_##TYPE *vec) { \
+  ctl_res_void res = {0}; \
+  res.ec = EOK; \
+  CHECK_EXEC_RES_RET_RES(ctl_vec_##TYPE##_dtor(vec), res, res); \
+  free(vec); \
+  return res; \
+} \
+QUAL ctl_res_void ctl_vec_##TYPE##_clear(ctl_vec_##TYPE* vec) { \
+  ctl_res_void res = {0}; \
+  res.ec = EOK; \
+  vec-&gt;begin_idx = 0U; \
+  vec-&gt;size = 0U; \
+  return res; \
+} \
+QUAL ctl_res_void ctl_vec_##TYPE##_reserve(ctl_vec_##TYPE *vec, size_t new_capacity) { \
+  ctl_res_void res = {0}; \
+  res.ec = EOK; \
+  CHECK_COND_RET_RES(new_capacity != 0, EINVALID_PARAM, res); \
+  if (new_capacity &lt;= vec-&gt;capacity) { \
+    return res; \
+  } \
+  vec-&gt;capacity = new_capacity; \
+  /* 先申请内存，然后初始化 */ \
+  TYPE *new_data = (TYPE *)malloc(vec-&gt;capacity * sizeof(TYPE)); \
+  CHECK_COND_RET_RES(new_data != NULL, EOOM, res); \
+  for (size_t idx = 0; idx &lt; vec-&gt;capacity; idx++) { \
+    CHECK_EXEC_RES_RET_RES(TYPE##_ctor(new_data + idx), res, res); \
+  } \
+  /* 把旧的内容拷贝过来 */ \
+  for (size_t idx = 0; idx &lt; vec-&gt;size; idx++) { \
+    CHECK_EXEC_RES_RET_RES(TYPE##_copy(new_data + idx, vec-&gt;data + idx), res, res); \
+  } \
+  /* 销毁掉旧的内容 */ \
+  for (size_t idx = 0; idx &lt; vec-&gt;capacity; idx++) { \
+    CHECK_EXEC_RES_RET_RES(TYPE##_dtor(vec-&gt;data + idx), res, res); \
+  } \
+  free(vec-&gt;data); \
+  vec-&gt;data = new_data; \
+  return res; \
+} \
+QUAL ctl_res_void ctl_vec_##TYPE##_resize(ctl_vec_##TYPE *vec, size_t new_size) { \
+  ctl_res_void res = {0}; \
+  res.ec = EOK; \
+  if (vec-&gt;begin_idx + new_size &gt; vec-&gt;capacity) { \
+    CHECK_EXEC_RES_RET_RES(ctl_vec_##TYPE##_reserve(vec, vec-&gt;begin_idx + new_size), res, res); \
+  } \
+  vec-&gt;size = new_size; \
+  return res; \
+} \
+QUAL ctl_res_void ctl_vec_##TYPE##_copy(ctl_vec_##TYPE *dst, const ctl_vec_##TYPE *src) { \
+  ctl_res_void res = {0}; \
+  res.ec = EOK; \
+  dst-&gt;size = src-&gt;size; \
+  /* 如果src的capacity已经比dst的capacity更大，那dst就要释放掉之前的内存，然后重新申请内存 */ \
+  if (dst-&gt;capacity &lt; src-&gt;size) { \
+    if (dst-&gt;data) { \
+      /* 释放掉dst的资源 */ \
+      for (size_t idx = 0; idx &lt; dst-&gt;capacity; idx++) { \
+        CHECK_EXEC_RES_RET_RES(TYPE##_dtor(dst-&gt;data + idx), res, res); \
+      } \
+      free(dst-&gt;data); \
+    } \
+    /* 必须要最后赋值，因为先释放后申请 */ \
+    dst-&gt;capacity = src-&gt;size; \
+    /* 为dst申请资源然后初始化 */ \
+    dst-&gt;data = (TYPE *)malloc(dst-&gt;capacity * sizeof(TYPE)); \
+    CHECK_COND_RET_RES(dst-&gt;data != NULL, EOOM, res); \
+    for (size_t idx = 0; idx &lt; src-&gt;size; idx++) { \
+      CHECK_EXEC_RES_RET_RES(TYPE##_ctor(dst-&gt;data + idx), res, res); \
+    } \
+  } \
+  dst-&gt;begin_idx = 0; \
+  dst-&gt;size = src-&gt;size; \
+  /* 然后拷贝 */ \
+  for (size_t idx = 0; idx &lt; src-&gt;size; idx++) { \
+    CHECK_EXEC_RES_RET_RES(TYPE##_copy(dst-&gt;data + idx, src-&gt;data + (idx + src-&gt;begin_idx)), res, res); \
+  } \
+  return res; \
+} \
+QUAL ctl_res_##TYPE ctl_vec_##TYPE##_get_at(ctl_vec_##TYPE *vec, size_t index) { \
+  ctl_res_##TYPE res = {0}; \
+  res.ec = EOK; \
+  CHECK_COND_RET_RES (index &lt; vec-&gt;size, EINDEX_OVERFLOW, res); \
+  ctl_res_void res_void = {0}; \
+  res_void.ec =  EOK; \
+  CHECK_EXEC_RES_RET_RES(TYPE##_copy(&amp;(res.value), vec-&gt;data + (vec-&gt;begin_idx + index)), res_void, res); \
+  return res; \
+} \
+QUAL ctl_res_void ctl_vec_##TYPE##_set_at(ctl_vec_##TYPE *vec, size_t index, const TYPE value) { \
+  ctl_res_void res = {0}; \
+  res.ec = EOK; \
+  CHECK_COND_RET_RES (index &lt; vec-&gt;size, EINDEX_OVERFLOW, res); \
+  CHECK_EXEC_RES_RET_RES(TYPE##_copy(vec-&gt;data + (vec-&gt;begin_idx + index), &amp;value), res, res); \
+  return res; \
+} \
+QUAL ctl_res_void ctl_vec_##TYPE##_grow(ctl_vec_##TYPE *vec) { \
+  ctl_res_void res = {0}; \
+  res.ec = EOK; \
+  size_t new_capacity = vec-&gt;capacity * CTL_VEC_GROW_FACTOR; \
+  CHECK_EXEC_RES_RET_RES(ctl_vec_##TYPE##_reserve(vec, new_capacity), res, res); \
+  return res; \
+} \
+QUAL ctl_res_void ctl_vec_##TYPE##_push_back(ctl_vec_##TYPE *vec, const TYPE data) { \
+  ctl_res_void res = {0}; \
+  res.ec = EOK; \
+  if (vec-&gt;capacity == (vec-&gt;begin_idx + vec-&gt;size)) { \
+    ctl_vec_##TYPE##_grow(vec); \
+  } \
+  CHECK_EXEC_RES_RET_RES(TYPE##_copy(vec-&gt;  data + (vec-&gt;begin_idx + vec-&gt;size), &amp;data), res, res); \
+  vec-&gt;size++; \
+  return res; \
+} \
+QUAL ctl_res_##TYPE ctl_vec_##TYPE##_pop_back(ctl_vec_##TYPE *vec) { \
+  ctl_res_##TYPE res = {0}; \
+  res.ec = EOK; \
+  ctl_res_void res_void = {0}; \
+  res_void.ec = EOK; \
+  CHECK_COND_RET_RES (vec-&gt;size != 0, EEMPTY, res); \
+  CHECK_EXEC_RES_RET_RES(TYPE##_copy(&amp;(res.value), vec-&gt; data + (vec-&gt;begin_idx + vec-&gt;size - 1U)), res_void, res); \
+  vec-&gt;size--; \
+  return res; \
+}
+#define IMPL_VEC(TYPE) IMPL_QUAL_VEC(TYPE, )
+#define IMPL_STATIC_VEC(TYPE) IMPL_QUAL_VEC(TYPE, static)
+#define IMPL_INLINE_STATIC_VEC(TYPE) IMPL_QUAL_VEC(TYPE, inline static)
+</code></pre>
+<p>如何使用
+在vector.h中添加如下代码</p>
+<pre><code class="language-c">DECL_VEC(int);
+</code></pre>
+<p>在vector.c中添加如下代码</p>
+<pre><code class="language-c">IMPL_VEC(int);
+</code></pre>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
         <a href="../template/" class="btn btn-neutral float-left" title="模板（泛型）"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../opaque_pointer_vector/" class="btn btn-neutral float-right" title="使用透明指针实现通用vector">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../opaque_pointer_vector/" class="btn btn-neutral float-right" title="使用void*实现通用vector">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
