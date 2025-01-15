@@ -131,9 +131,10 @@
                 <h1 id="_1">错误处理</h1>
 <h2 id="_2">使用返回值和错误码</h2>
 <pre><code class="language-c">typedef enum {
-  E_SUCC = 0,
+  E_OK = 0,
   E_DOM,
   E_OVERLOW,
+  E_OOM,
   E_END
 } status_code;
 // 也可以返回int，因为枚举可以转换为int
@@ -142,13 +143,13 @@ status_code divide(int a, int b, int *result) {
     return E_DOM;   // 返回错误码
   }
   *result = a / b;
-  return E_SUCC;
+  return E_OK;
 }
 
 int main() {
   int result;
   status_code code = divide(10, 0, &amp;result);
-  if (code == E_SUCC) {
+  if (code == E_OK) {
     printf(&quot;Result: %d\n&quot;, result);
   } else {
     printf(&quot;Error: %d\n&quot;, code);
@@ -164,13 +165,13 @@ int main() {
 <pre><code class="language-c">int main() {
   int* result = NULL;
   FILE* fp = NULL;
-  status_code code = E_SUCC;
+  status_code code = E_OK;
   result = (int*)malloc(sizeof(int));
   if (!result) goto cleanup;
   fp = fopen(&quot;log.txt&quot;, &quot;w&quot;);
   if (!fp) goto cleanup;
   code = divide(10, 0, result);
-  if (code == E_SUCC) {
+  if (code == E_OK) {
     fprintf(fp, &quot;Result: %d\n&quot;, *result);
   } else {
     goto cleanup;
@@ -189,20 +190,20 @@ cleanup:
 #define CATCH cleanup:
 #define CHECK(...) {                                                           \
   code = __VA_ARGS__;                                                          \
-  if (code != E_SUCC) {                                                        \  
+  if (code != E_OK) {                                                        \  
     fprintf(stderr, &quot;%s %s:%u code: %d&quot;, __FUNC__, __FILE__, __LINE__, code);  \
     goto cleanup;                                                              \
   }                                                                            \
 }
 #define CHECK_NONULL(ptr) if (!(ptr)) {                 \
-  code = E_MEM;                                         \
+  code = E_OOM;                                         \
   goto cleanup;                                         \
 }
 </code></pre>
 <pre><code class="language-c">int main() {
   int* result = NULL;
   FILE* fp = NULL;
-  status_code code = E_SUCC;
+  status_code code = E_OK;
   TRY {
     result = (int*)malloc(sizeof(int));
     CHECK_NONNULL(result);

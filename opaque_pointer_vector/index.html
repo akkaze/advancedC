@@ -124,14 +124,14 @@
               
                 <h1 id="voidvector">使用void*实现通用vector</h1>
 <h2 id="icd">icd函数</h2>
-<pre><code class="language-c">typedef int (init_func_t*)(void*);
+<pre><code class="language-c">typedef int (ctor_func_t*)(void*);
 typedef int (copy_func_t*)(void*, void*);
 // 析构函数通常不返回错误码，防止嵌套错误，如果遇到错误，一般直接exit
 typedef void (dtor_func_t*)(void*);
 
 typedef struct icd_s {
   size_t size;
-  init_func_t init;
+  ctor_func_t ctor;
   copy_func_t copy;
   dtor_func_t dtor;
 } icd_t;
@@ -163,18 +163,11 @@ int vector_ctor_by_size(vector *vec, size_t size) {
     /* 初始化就要初始化所有分配的内存 */
     char* data_p = (char*)vec-&gt;data;
     for (size_t idx = 0; idx &lt; vec-&gt;capacity; idx++) {
-      CHECK(vec-&gt;icd.init(data_p + idx * vec-&gt;icd.size));
+      CHECK(vec-&gt;icd.ctor(data_p + idx * vec-&gt;icd.size));
     }
-    return 0;
   }
   CATCH {
-    if (vec-&gt;data) {
-      char* data_p = (char*)vec-&gt;data;
-      for (size_t idx = 0; idx &lt; vec-&gt;capacity; idx++) {
-        vec-&gt;icd.dtor(data_p + idx * vec-&gt;icd.size);
-      }
-      free(vec-&gt;data);
-    }
+    return code;
   }
   return 0;
 }
@@ -187,6 +180,78 @@ void vector_dtor(vector *vec) {
   free(vec-&gt;data);
   vec-&gt;data = NULL;
   return;
+}
+
+int vector_copy(vector *dst, const vector *src) {
+  int code = 0;
+  dst-&gt;size = src-&gt;size;
+  char* dst_data_p = (char*)dst-&gt;data;
+  char* src_data_p = (char*)src-&gt;data;
+  TRY {
+    /* 如果src的capacity已经比dst的capacity更大，那dst就要释放掉之前的内存，然后重新申请内存 */ \
+    if (dst-&gt;capacity &lt; src-&gt;size) {
+      if (dst-&gt;data) {
+        /* 释放掉dst的资源 */
+        if (dst-&gt;icd.dtor) {
+          for (size_t idx = 0u; idx &lt; dst-&gt;capacity; idx++) {
+            dst-&gt;icd.dtor(dst_data_p + idx);
+          }
+        }
+        free(dst-&gt;data);
+      }
+      /* 必须要最后赋值，因为先释放后申请 */
+      dst-&gt;capacity = src-&gt;size;
+      /* 为dst申请资源然后初始化 */
+      dst-&gt;data = malloc(dst-&gt;capacity * dst-&gt;icd.size);
+      CHECK_NONULL(dst-&gt;data);
+      if (dst-&gt;icd.ctor) {
+        for (size_t idx = 0u; idx &lt; src-&gt;size; idx++) {
+          CHECK(dst-&gt;icd.ctor(dst_data_p + idx));
+        }
+      }
+    }
+    dst-&gt;begin_idx = 0;
+    dst-&gt;size = src-&gt;size;
+    /* 然后拷贝 */
+    if (src-&gt;icd.copy) {
+      for (size_t idx = 0u; idx &lt; src-&gt;size; idx++) {
+        CHECK(src-&gt;icd.copy(dst_data_p + idx, src_data_p + (idx + src-&gt;begin_idx))); 
+      }
+    }
+  }
+  CATCH {
+    return code;
+  }
+  return 0;
+}
+
+int vector_get_at(vector *vec, size_t index, void* elem) {
+  int code = 0;
+  TRY {
+    CHECK_INDEX (index, vec-&gt;size);
+    char* data_p = (char*)vec-&gt;data;
+    memcpy(elem, data_p + index * vec-&gt;icd.size, size);
+    if (vec-&gt;icd.copy)
+      CHECK(vec-&gt;icd.copy(elem, data_p + index * vec-&gt;icd.size));
+  }
+  CATCH {
+    return code;
+  }
+  return 0;
+} 
+int vector_set_at(vector *vec, size_t index, void* elem) {
+  int code = 0;
+  TRY {
+    CHECK_INDEX (index, vec-&gt;size);
+    char* data_p = (char*)vec-&gt;data;
+    memcpy(data_p + index * vec-&gt;icd.size, elem, size);
+    if (vec-&gt;icd.copy)
+      CHECK(vec-&gt;icd.copy(data_p + index * vec-&gt;icd.size, elem));
+  }
+  CATCH {
+    return code;
+  }
+  return 0;
 }
 
 </code></pre>
