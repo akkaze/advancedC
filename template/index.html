@@ -241,7 +241,7 @@ void list_insert_after(list_t* list, list_t* node);
 void list_insert_before(list_t* list, list_t* node);
 void list_remove(list_t* node);
 int list_isempty(const list_t* list);
-unsigned int list_len(const list_t* list);
+unsigned int list_size(const list_t* list);
 </code></pre>
 <p>已知link的情况下，如何拿到data的值</p>
 <pre><code class="language-c">struct node
@@ -290,16 +290,16 @@ int list_isempty(const list_t* list)
     return list-&gt;next == list;
 }
 
-unsigned int list_len(const list_t* list)
+unsigned int list_size(const list_t* list)
 {
-    unsigned int len = 0;
+    unsigned int size = 0;
     const list_t* p = list;
     while (p-&gt;next != list)
     {
         p = p-&gt;next;
-        len++;
+        size++;
     }
-    return len;
+    return size;
 }
 </code></pre>
               
