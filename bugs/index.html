@@ -92,29 +92,37 @@
     </li>
         </ul>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_7">乘法</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_7">取反</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#_8">整数乘法上溢出</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_8">有符号整数取反上溢出</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#_9">整数乘法下溢出</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_9">无整数取反下溢出</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_10">乘法</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#_11">整数乘法上溢出</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#_12">整数乘法下溢出</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#inf">浮点数inf</a>
     </li>
         </ul>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_10">除法和模运算</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_13">除法和模运算</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#_11">整数除零</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_14">整数除零</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#_12">浮点数除零</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_15">浮点数除零</a>
     </li>
         </ul>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_13">移位</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_16">移位</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#_14">有符号整数左移溢出</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_17">有符号整数左移溢出</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#_15">无符号整数左移溢出</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_18">无符号整数左移溢出</a>
     </li>
         </ul>
     </li>
@@ -122,33 +130,39 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#bug_2">内存BUG</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#_16">内存越界</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_17">内存泄漏</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_18">野指针</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_19">内存越界</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#_19">空指针</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_20">堆内存越界</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#_20">随机指针</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#_21">悬垂指针</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#_22">双重释放</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_21">栈内存越界</a>
     </li>
         </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_22">内存泄漏</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#_23">悬垂指针</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#_24">双重释放</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_25">栈溢出</a>
     </li>
         </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#bug_3">并发BUG</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#_23">死锁</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_24">不可重入锁重入</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_25">锁在同一线程多次释放</a>
-    </li>
     <li class="toctree-l3"><a class="reference internal" href="#_26">数据读写竞争</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#bug_4">锁相关BUG</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#_27">死锁</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#_28">不可重入锁重入</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#_29">锁在同一线程多次释放</a>
+    </li>
+        </ul>
     </li>
         </ul>
     </li>
@@ -202,33 +216,353 @@
 <h2 id="bug_1">算术BUG</h2>
 <h3 id="_1">加法</h3>
 <h4 id="_2">整数加法上溢出</h4>
+<pre><code class="language-c">int a = INT32_MAX - 1;
+int b = a + 10;
+</code></pre>
 <h4 id="_3">整数加法下溢出</h4>
+<pre><code class="language-c">int a = INT32_MIN + 1;
+int b = a - 10;
+</code></pre>
 <h3 id="_4">减法</h3>
 <h4 id="_5">整数减法上溢出</h4>
+<pre><code class="language-c">int a = 10;
+int b = a - INT32_MIN;
+</code></pre>
 <h4 id="_6">整数减法下溢出</h4>
-<h3 id="_7">乘法</h3>
-<h4 id="_8">整数乘法上溢出</h4>
-<h4 id="_9">整数乘法下溢出</h4>
+<pre><code class="language-c">int a = -10;
+int b = a - INT32_MAX;
+</code></pre>
+<h3 id="_7">取反</h3>
+<h4 id="_8">有符号整数取反上溢出</h4>
+<pre><code class="language-c">int a = INT32_MIN;
+int b = -a;
+</code></pre>
+<p><strong><em>对于有符号整数，取反没有下溢出，因为有符号整数的最小值的绝对值大于最大值的绝对值</em></strong></p>
+<h4 id="_9">无整数取反下溢出</h4>
+<p>对于无符号整数，除了0，其他任何数取反都会下溢出</p>
+<pre><code class="language-c">unsigned int a = 10;
+unsigned int b = -a;
+</code></pre>
+<h3 id="_10">乘法</h3>
+<h4 id="_11">整数乘法上溢出</h4>
+<pre><code class="language-c">int a = INT32_MAX / 2;
+int b = INT32_MAX / 2;
+int c = a * b;
+</code></pre>
+<h4 id="_12">整数乘法下溢出</h4>
+<pre><code class="language-c">int a = INT32_MIN / 2;
+int b = INT32_MIN / 2;
+int c = a * b;
+</code></pre>
 <h4 id="inf">浮点数inf</h4>
-<h3 id="_10">除法和模运算</h3>
-<h4 id="_11">整数除零</h4>
-<h4 id="_12">浮点数除零</h4>
-<h3 id="_13">移位</h3>
-<h4 id="_14">有符号整数左移溢出</h4>
-<h4 id="_15">无符号整数左移溢出</h4>
+<h3 id="_13">除法和模运算</h3>
+<p>除零通常会造成硬件异常</p>
+<h4 id="_14">整数除零</h4>
+<pre><code class="language-c">int a = 10;
+int b = 0;
+int c = a / b;
+</code></pre>
+<h4 id="_15">浮点数除零</h4>
+<p>浮点数除以一个很小的数通常都会得到inf</p>
+<h3 id="_16">移位</h3>
+<h4 id="_17">有符号整数左移溢出</h4>
+<p>因为有符号位，有符号整数允许左移的最大位数要比自身的位数小1。</p>
+<pre><code class="language-c">int a = 0;
+int b = a &lt;&lt; 31;
+</code></pre>
+<h4 id="_18">无符号整数左移溢出</h4>
+<p>无符号整数允许左移的最大位数通常和自身位数相等。</p>
+<pre><code class="language-c">unsigned int a = 0;
+unsigned int b = a &lt;&lt; 32;
+</code></pre>
 <h2 id="bug_2">内存BUG</h2>
-<h3 id="_16">内存越界</h3>
-<h3 id="_17">内存泄漏</h3>
-<h3 id="_18">野指针</h3>
-<h4 id="_19">空指针</h4>
-<h4 id="_20">随机指针</h4>
-<h4 id="_21">悬垂指针</h4>
-<h4 id="_22">双重释放</h4>
+<h3 id="_19">内存越界</h3>
+<h4 id="_20">堆内存越界</h4>
+<pre><code class="language-c">int main() {
+  int* ptr = (int*)malloc(8 * sizeof(int));
+  ptr[10] = 10;
+  free(ptr);
+  return 0;
+}
+</code></pre>
+<h4 id="_21">栈内存越界</h4>
+<pre><code class="language-c">int main() {
+  int arr[10] = {0};
+  arr[10] = 10;
+  return 0;
+}
+</code></pre>
+<h3 id="_22">内存泄漏</h3>
+<p>直到程序退出也没有释放的内存往往会导致内存泄漏。</p>
+<pre><code class="language-c">int* func() {
+  int* ptr = (int*)malloc(1024 * sizeof(int));
+  return ptr;
+}
+int main() {
+  int* ptr = func();
+  return 0;
+}
+### 野指针
+以下类型统称为野指针
+#### 空指针
+初始化为空的指针
+```c
+int main() {
+  int* p = NULL;
+  *p = 10;
+  return 0;
+}
+#### 随机指针
+没有被初始化就被使用的指针往往指向随机值，当然也可能是空值。
+```c
+int main() {
+  int* p;
+  *p = 10;
+  return 0;
+}
+</code></pre>
+<h4 id="_23">悬垂指针</h4>
+<p>悬垂通常指该指针指向的内容的生命周期已经结束，最典型的是返回栈上变量的地址。</p>
+<pre><code class="language-c">int* func() {
+  int a = 0;
+  return &amp;a;
+}
+int main() {
+  // 这就是悬垂指针
+  int* ptr = func();
+  return 0;
+}
+</code></pre>
+<h4 id="_24">双重释放</h4>
+<pre><code class="language-c">int* func() {
+  int* ptr = (int*)malloc(1024 * sizeof(int));
+  free(ptr);
+  return ptr;
+}
+int main() {
+  int* ptr = func();
+  free(ptr);
+  return 0;
+}
+</code></pre>
+<h3 id="_25">栈溢出</h3>
+<p>以下程序在某些机器下可能会栈溢出，注意func的形参和实参都被分配在栈上，可能会导致栈内存不足。</p>
+<pre><code class="language-c">long func(int arr[]) {
+  long sum = 0;
+  ...
+  return sum;
+}
+int main() {
+  int arr[1024 * 1024];
+  long sum = func(arr);
+  printf(&quot;%ld&quot;, sum);
+  return 0;
+}
+</code></pre>
 <h2 id="bug_3">并发BUG</h2>
-<h3 id="_23">死锁</h3>
-<h3 id="_24">不可重入锁重入</h3>
-<h3 id="_25">锁在同一线程多次释放</h3>
+<p>为了可移植性，这里使用tinycthread的api。</p>
 <h3 id="_26">数据读写竞争</h3>
+<h3 id="bug_4">锁相关BUG</h3>
+<pre><code class="language-c">#include &lt;tinycthread.h&gt;
+
+int value = 0;
+
+typedef struct thr_call_s
+{
+    thrd_t thr;
+    int push;
+    int ret;
+} thr_call;
+
+int thr_routine(void* data)
+{
+  // 不同线程改写同一全局变量，会导致未定义行为，触发BUG
+  value = (thr_call*)data-&gt;push;
+  return 0;
+}
+
+int main(int argc, char const *argv[])
+{
+    thr_call val[5] = {0};
+    for (size_t i = 0; i &lt; sizeof(val) / sizeof(*val); i++)
+    {
+        val[i].push = i;
+
+        thrd_create(&amp;(val[i].thr), thr_rountine, &amp;(val[i]));
+    }
+    for (size_t i = 0; i &lt; sizeof(val) / sizeof(*val); i++)
+    {
+        thrd_join(val[i].thr, &amp;(val[i].ret));
+    }
+    // 查看返回值
+    for (size_t i = 0; i &lt; sizeof(val) / sizeof(*val); i++)
+    {
+        printf(&quot;return:[%d], expect:[%d]\n&quot;, val[i].ret, i%2==0?0:1);
+    }
+    return 0;
+}
+</code></pre>
+<h4 id="_27">死锁</h4>
+<pre><code class="language-c">#include &lt;tinycthread.h&gt;
+
+mtx_t mtx1;
+mtx_t mtx2;
+
+typedef struct thr_call_s
+{
+    thrd_t thr;
+    int push;
+    int ret;
+} thr_call;
+
+void print(void* data) { 
+  for (size_t i = 0; i &lt; 5; i++)
+  {
+      printf(&quot;thread:[%d], index:[%d]\n&quot;, ((th_call*)data)-&gt;push, i);
+  }
+}
+int thr1_routine(void* data)
+{
+  mtx_lock(&amp;mtx1); 
+  mtx_lock(&amp;mtx2);  
+  print(data);
+  mtx_unlock(&amp;mtx2);
+  mtx_unlock(&amp;mtx1);
+  return ((thr_call*)data)-&gt;push % 2 == 0? 0 : 1;
+}
+
+int thr2_routine(void* data)
+{
+  mtx_lock(&amp;mtx2); 
+  mtx_lock(&amp;mtx1);  
+  print(data);
+  mtx_unlock(&amp;mtx1);
+  mtx_unlock(&amp;mtx2);
+  return ((thr_call*)data)-&gt;push % 2 == 0? 0 : 1;
+}
+
+int main(int argc, char const *argv[])
+{
+  thr_call val[2] = {0};
+  mtx_init(&amp;mtx1, mtx_plain);
+  mtx_init(&amp;mtx2, mtx_plain);
+  val[0].push = 0;
+  val[1].push = 1;
+
+  thrd_create(&amp;(val[0].thr), thrd1_rountine, &amp;(val[0]));
+  thrd_create(&amp;(val[1].thr), thrd2_rountine, &amp;(val[1]));
+
+  thrd_join(val[0].thr, &amp;(val[0].ret));
+  thrd_join(val[1].thr, &amp;(val[1].ret));
+
+  mtx_destroy(&amp;mtx1);
+  mtx_destroy(&amp;mtx2);
+  return 0;
+}
+</code></pre>
+<h4 id="_28">不可重入锁重入</h4>
+<pre><code class="language-c">#include &lt;tinycthread.h&gt;
+
+mtx_t mtx;
+
+typedef struct thr_call_s
+{
+    thrd_t thr;
+    int push;
+    int ret;
+} thr_call;
+
+void print(void* data) {
+  // 这里会触发BUG，一直等待
+  mtx_lock(&amp;mtx);  
+  for (size_t i = 0; i &lt; 5; i++)
+  {
+      printf(&quot;thread:[%d], index:[%d]\n&quot;, ((th_call*)data)-&gt;push, i);
+  }
+  mtx_unlock(&amp;mtx);
+}
+int thr_routine(void* data)
+{
+  mtx_lock(&amp;mtx);  
+  print(data);
+  mtx_unlock(&amp;mtx);
+  return ((thr_call*)data)-&gt;push % 2 == 0? 0 : 1;
+}
+
+int main(int argc, char const *argv[])
+{
+  thr_call val[5] = {0};
+  mtx_init(&amp;mtx, mtx_plain);
+  for (size_t i = 0; i &lt; sizeof(val) / sizeof(*val); i++)
+  {
+      val[i].push = i;
+
+      thrd_create(&amp;(val[i].thr), thr_rountine, &amp;(val[i]));
+  }
+  for (size_t i = 0; i &lt; sizeof(val) / sizeof(*val); i++)
+  {
+      thrd_join(val[i].thr, &amp;(val[i].ret));
+  }
+  // 查看返回值
+  for (size_t i = 0; i &lt; sizeof(val) / sizeof(*val); i++)
+  {
+      printf(&quot;return:[%d], expect:[%d]\n&quot;, val[i].ret, i%2==0?0:1);
+  }
+  mtx_destroy(&amp;mtx);
+  return 0;
+}
+</code></pre>
+<h4 id="_29">锁在同一线程多次释放</h4>
+<pre><code class="language-c">#include &lt;tinycthread.h&gt;
+
+mtx_t mtx;
+
+typedef struct thr_call_s
+{
+  thrd_t thr;
+  int push;
+  int ret;
+} thr_call;
+
+void print(void* data) { 
+  for (size_t i = 0; i &lt; 5; i++)
+  {
+      printf(&quot;thread:[%d], index:[%d]\n&quot;, ((th_call*)data)-&gt;push, i);
+  }
+  mtx_unlock(&amp;mtx);
+}
+int thr_routine(void* data)
+{
+  mtx_lock(&amp;mtx);  
+  print(data);
+  // 这里会触发BUG，被第二次释放
+  mtx_unlock(&amp;mtx);
+  return ((thr_call*)data)-&gt;push % 2 == 0? 0 : 1;
+}
+
+int main(int argc, char const *argv[])
+{
+  thr_call val[5] = {0};
+  mtx_init(&amp;mtx, mtx_plain);
+  for (size_t i = 0; i &lt; sizeof(val) / sizeof(*val); i++)
+  {
+      val[i].push = i;
+
+      thrd_create(&amp;(val[i].thr), thr_rountine, &amp;(val[i]));
+  }
+  for (size_t i = 0; i &lt; sizeof(val) / sizeof(*val); i++)
+  {
+      thrd_join(val[i].thr, &amp;(val[i].ret));
+  }
+  // 查看返回值
+  for (size_t i = 0; i &lt; sizeof(val) / sizeof(*val); i++)
+  {
+      printf(&quot;return:[%d], expect:[%d]\n&quot;, val[i].ret, i%2==0?0:1);
+  }
+  mtx_destroy(&amp;mtx);
+  return 0;
+}
+</code></pre>
               
             </div>
           </div><footer>
