@@ -168,15 +168,15 @@ void add(void* dst, void* lhs, void* rhs, unsigned int num, unsigned int elem_si
   }
 }
 </code></pre>
-<pre><code class="language-c">void add_int_func_t(void* dst, void* lhs, void* rhs) {
+<pre><code class="language-c">void add_int(void* dst, void* lhs, void* rhs) {
   *(int*)dst = *(int*)lhs + *(int*)rhs; 
 }
-void add_float_func_t(void* dst, void* lhs, void* rhs) {
+void add_float(void* dst, void* lhs, void* rhs) {
   *(float*)dst = *(float*)lhs + *(float*)rhs; 
 }
 </code></pre>
-<pre><code class="language-c">add(dst, lhs, rhs, num, sizeof(int), add_int_func_t);
-add(dst, lhs, rhs, num, sizeof(float), add_float_func_t);
+<pre><code class="language-c">add(dst, lhs, rhs, num, sizeof(int), add_int);
+add(dst, lhs, rhs, num, sizeof(float), add_float);
 </code></pre>
 <h2 id="_5">侵入式容器</h2>
 <p>普通链表：
