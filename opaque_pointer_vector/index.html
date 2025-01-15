@@ -225,6 +225,64 @@ int vector_copy(vector *dst, const vector *src) {
   return 0;
 }
 
+void vector_clear(vector* vec) {
+  vec-&gt;begin_idx = 0u;
+  vec-&gt;size = 0u;
+  return;
+}
+int vector_reserve(vector *vec, size_t new_capacity) {
+
+  int code = 0;
+  char* dst_data_p = (char*)dst-&gt;data;
+  char* src_data_p = (char*)src-&gt;data;
+  TRY {
+    CHECK_NOT_EQ(new_capacity, 0);
+    if (new_capacity &lt;= vec-&gt;capacity) {
+      return code;
+    }
+    vec-&gt;capacity = new_capacity;
+    /* 先申请内存，然后初始化 */
+    void* new_data = malloc(vec-&gt;capacity * vec-&gt;icd.size); 
+    CHECK_NONNULL(new_data);
+    char* new_data_p = (char*)new_data;
+    if (vec-&gt;icd.ctor) {
+      for (size_t idx = 0u; idx &lt; vec-&gt;capacity; idx++) {
+        CHECK(T_ctor(new_data + idx), res, res);
+      }
+    }
+    /* 把旧的内容拷贝过来 */
+    if (vec-&gt;icd.copy) {
+      for (size_t idx = 0; idx &lt; vec-&gt;size; idx++) {
+        CHECK(vec-&gt;icd.copy(new_data_p + idx, data_p + idx));
+      }
+    }
+    /* 销毁掉旧的内容 */
+    if (vec-&gt;icd.dtor) {
+      for (size_t idx = 0; idx &lt; vec-&gt;capacity; idx++) {
+        CHECK(vec-&gt;icd.dtor(data_p + idx));
+      }
+    }
+    free(vec-&gt;data);
+    vec-&gt;data = new_data;
+  }
+  CATCH {
+    return code;
+  }
+  return 0;
+}
+int vector_resize(vector *vec, size_t new_size) {
+  int code = 0;
+  TRY {
+    if (vec-&gt;begin_idx + new_size &gt; vec-&gt;capacity) {
+      CHECK(vector_reserve(vec, vec-&gt;begin_idx + new_size));
+    }
+    vec-&gt;size = new_size;
+  } CATCH {
+    return code;
+  }
+  return 0;
+}
+
 int vector_get_at(vector *vec, size_t index, void* elem) {
   int code = 0;
   TRY {
