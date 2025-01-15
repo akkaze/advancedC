@@ -132,6 +132,8 @@
               
                 <h1 id="_1">模板</h1>
 <h2 id="_2">使用宏实现模板</h2>
+<p>使用宏可以在编译期实现模板，它和c++等语言的模板本质一样，通过对不同的类型进行codegen来实例化代码，但是因为语言本身局限，<strong>不支持隐式实例化和特化</strong>。但是在实际开发中完全够用，可以复用大量代码，只是易用性略差。
+和c++模板一样，它会导致代码膨胀。</p>
 <pre><code class="language-c">#define DECL_ADD(type)                                                  \
   void add_##type(type* dst, type* lhs, type* rhs, unsigned int num);
 #define IMPL_ADD(type)                                                  \
