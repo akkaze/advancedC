@@ -206,7 +206,7 @@ set_gender(&amp;tom, MALE);
 person* tom = NEW_PERSON_BY_GENDER_AGE_NAME(MALE, 18, &quot;tom&quot;);
 </code></pre>
 <h4 id="_6">析构函数</h4>
-<p>析构函数除了self指针通常没有参数。值得注意的是，由于C语言没有rtti，析构函数必须手动调用。</p>
+<p>析构函数除了self指针通常没有参数。值得注意的是，由于C语言没有raii，析构函数必须手动调用。</p>
 <pre><code class="language-c">void person_dtor(person* self) {
   printf(&quot;person destructor\n&quot;);
 }
@@ -221,7 +221,7 @@ DEL_PERSON(tom);
 </code></pre>
 <h4 id="_7">拷贝函数</h4>
 <p>拷贝函数通常接受两个参数，一个为目的结构体的指针，另一个是源结构体的指针</p>
-<pre><code class="language-c">void person_copy(person* dst, person* src) {
+<pre><code class="language-c">void person_copy(person* dst, const person* src) {
   dst-&gt;gender = src-&gt;gender;
   dst-&gt;age = src-&gt;age;
   dst-&gt;name = src-&gt;name;
@@ -231,9 +231,23 @@ person* jerry = ...;
 person_copy(jerry, tom);
 </code></pre>
 <h3 id="_8">可见性</h3>
+<p>通常需要对外暴露的方法声明头文件里。不需要对外暴露，仅仅在内部使用的函数，直接定义在源文件里。
+person.h</p>
+<pre><code class="language-c">void person_speak(person* self, const char* msg);
+</code></pre>
+<p>person.c</p>
+<pre><code class="language-c">// 不对外声明，仅在c文件里定义
+void internal_person_speak(person* self, const char* greeting, const char* msg) {
+  printf(&quot;%s\n&quot;, greeting);
+  printf(&quot;%s\n&quot;, msg);
+}
+void person_speak(person* self, const char* msg) {
+  internal_person_speak(self, &quot;how are you&quot;, msg);
+}
+</code></pre>
 <h2 id="_9">继承</h2>
 <h3 id="_10">单一继承</h3>
-<p>在单继承的情况下，通常将父类作为子类的第一个成员，这样做的原因是，子对象和父对象的首地址是相同的。</p>
+<p>在单继承的情况下，<mark>通常将父类作为子类的第一个成员，这样做的原因是，子对象和父对象的首地址是相同的。</mark></p>
 <pre><code class="language-c">typedef man_s {
   person super;
   int id;
@@ -265,9 +279,16 @@ typedef struct man_s {
 <pre><code class="language-c">man* someone = (man*)((char*)super - offsetof(man, super2)); 
 </code></pre>
 <h2 id="_14">多态</h2>
-<p>在编程语言和类型论中，多态（英语：polymorphism）指为不同数据类型的实体提供统一的接口。 多态类型（英语：polymorphic type）可以将自身所支持的操作套用到其它类型的值上。</p>
+<p>在编程语言和类型论中，多态（英语：polymorphism）指为不同数据类型的实体提供统一的接口。 多态类型（英语：polymorphic type）可以将自身所支持的操作套用到其它类型的值上。
+<mark>多态的存在具有哲学意义，它意味着具有相似外观的事物具有相似的行为，但是行为的结果往往不同。</mark></p>
+<ul>
+<li>相似的外观意味着它们可以被存放到一起。</li>
+<li>相似的行为意味着它们可以使用相同的调用方法。</li>
+<li>不同的行为结果意味着这些行为的实现并不一样。</li>
+</ul>
 <h3 id="_15">虚函数实现</h3>
-<p>这里的技巧和单继承一样，子类在虚继承的时候需将父类作为第一个成员。</p>
+<p><mark>这里的技巧和单继承一样，子类在虚继承的时候需将父类作为第一个成员</mark>。
+<mark>这里有一点非常重要，在虚继承的情况下，析构函数必须为虚函数，因为当调用析构函数的时候，self指针的类型已经不知道了，这是无法通过类型调用到正确的析构函数上，只能使用虚函数。</mark></p>
 <pre><code class="language-c">typedef void (sound_func_t*)();
 typedef struct animal_s {
   sound_func_t sound;
@@ -375,7 +396,6 @@ void cat_ctor(cat* self) {
   __sound();                                          \ 
 }
 </code></pre>
-<p>这里有一点非常重要，在虚继承的情况下</p>
 <pre><code class="language-c">animal_handle tom = (animal_handle)NEW_CAT();
 animal_handle spike = (animal_handle)NEW_DOG();
 CALL_SOUND_METHOD(tom);

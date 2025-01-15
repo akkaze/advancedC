@@ -139,21 +139,20 @@ typedef struct { \
   size_t size; \
   size_t capacity; \
 } ctl_vec_##TYPE; \
-DECL_RES_P(ctl_vec_##TYPE); \
 size_t ctl_vec_##TYPE##_size(ctl_vec_##TYPE* vec); \
 size_t ctl_vec_##TYPE##_begin_idx(ctl_vec_##TYPE* vec); \
-ctl_res_ctl_vec_##TYPE##_p ctl_vec_##TYPE##_new(size_t size); \
-ctl_res_void ctl_vec_##TYPE##_free(ctl_vec_##TYPE *vec); \
-ctl_res_void ctl_vec_##TYPE##_ctor_by_size(ctl_vec_##TYPE *vec, size_t size); \
-ctl_res_void ctl_vec_##TYPE##_ctor(ctl_vec_##TYPE *vec); \
-ctl_res_void ctl_vec_##TYPE##_dtor(ctl_vec_##TYPE *vec); \
-ctl_res_void ctl_vec_##TYPE##_copy(ctl_vec_##TYPE *dst, const ctl_vec_##TYPE *src); \
-ctl_res_void ctl_vec_##TYPE##_set_at(ctl_vec_##TYPE *vec, size_t index, const TYPE data); \
-ctl_res_##TYPE ctl_vec_##TYPE##_get_at(ctl_vec_##TYPE *vec, size_t index); \
-ctl_res_void ctl_vec_##TYPE##_push_back(ctl_vec_##TYPE *vec, const TYPE data); \
-ctl_res_##TYPE ctl_vec_##TYPE##_pop_back(ctl_vec_##TYPE* vec); \
-ctl_res_void ctl_vec_##TYPE##_reserve(ctl_vec_##TYPE* vec, size_t new_capacity); \
-ctl_res_void ctl_vec_##TYPE##_resize(ctl_vec_##TYPE* vec, size_t new_size); 
+int ctl_vec_##TYPE##_new(size_t size); \
+void ctl_vec_##TYPE##_free(ctl_vec_##TYPE *vec); \
+int ctl_vec_##TYPE##_ctor_by_size(ctl_vec_##TYPE *vec, size_t size); \
+int ctl_vec_##TYPE##_ctor(ctl_vec_##TYPE *vec); \
+void ctl_vec_##TYPE##_dtor(ctl_vec_##TYPE *vec); \
+int ctl_vec_##TYPE##_copy(ctl_vec_##TYPE *dst, const ctl_vec_##TYPE *src); \
+int ctl_vec_##TYPE##_set_at(ctl_vec_##TYPE *vec, size_t index, const TYPE data); \
+int ctl_vec_##TYPE##_get_at(ctl_vec_##TYPE *vec, size_t index, TYPE* data); \
+int ctl_vec_##TYPE##_push_back(ctl_vec_##TYPE *vec, const TYPE data); \
+int ctl_vec_##TYPE##_pop_back(ctl_vec_##TYPE* vec, TYPE* data); \
+int ctl_vec_##TYPE##_reserve(ctl_vec_##TYPE* vec, size_t new_capacity); \
+int ctl_vec_##TYPE##_resize(ctl_vec_##TYPE* vec, size_t new_size); 
 </code></pre>
 <p>vector_impl.h</p>
 <pre><code class="language-c">#define IMPL_QUAL_VEC(TYPE, QUAL) \
@@ -163,140 +162,151 @@ QUAL size_t ctl_vec_##TYPE##_size(ctl_vec_##TYPE* vec) { \
 QUAL size_t ctl_vec_##TYPE##_begin_idx(ctl_vec_##TYPE* vec) { \
   return vec-&gt;begin_idx; \
 } \
-QUAL ctl_res_void ctl_vec_##TYPE##_ctor_by_size(ctl_vec_##TYPE *vec, size_t size) { \
-  ctl_res_void res_void = {0}; \
-  res_void.ec = EOK; \
-  vec-&gt;begin_idx = 0; \
-  vec-&gt;size = size; \
-  vec-&gt;capacity = size; \
-  vec-&gt;data = (TYPE *)malloc(vec-&gt;capacity * sizeof(TYPE)); \
-  /* 初始化就要初始化所有分配的内存 */  \
-  for (size_t idx = 0; idx &lt; vec-&gt;capacity; idx++) { \
-    CHECK_EXEC_RES_RET_RES(TYPE##_ctor(vec-&gt;data + idx), res_void, res_void); \
+QUAL int ctl_vec_##TYPE##_ctor_by_size(ctl_vec_##TYPE *vec, size_t size) { \
+  int code = 0; \
+  TRY { \
+    vec-&gt;begin_idx = 0; \
+    vec-&gt;size = size; \
+    vec-&gt;capacity = size; \
+    vec-&gt;data = (TYPE *)malloc(vec-&gt;capacity * sizeof(TYPE)); \
+    CHECK_NONULL(vec-&gt;data);           \
+    /* 初始化就要初始化所有分配的内存 */  \
+    for (size_t idx = 0u; idx &lt; vec-&gt;capacity; idx++) { \
+      CHECK(TYPE##_ctor(vec-&gt;data + idx)); \
+    } \
   } \
-  return res_void; \
-} \
-QUAL ctl_res_void ctl_vec_##TYPE##_ctor(ctl_vec_##TYPE *vec) { \
-  ctl_res_void res = {0}; \
-  res.ec = EOK; \
-  CHECK_EXEC_RES_RET_RES(ctl_vec_##TYPE##_ctor_with_size(vec, CTL_VEC_MINIMAL_SIZE), res, res) ; \
-  return res; \
-} \
-QUAL ctl_res_void ctl_vec_##TYPE##_dtor(ctl_vec_##TYPE *vec) { \
-  ctl_res_void res = {0}; \
-  res.ec = EOK; \
-  /* 销毁就要销毁所有分配的内存 */ \
-  for (size_t idx = 0; idx &lt; vec-&gt;capacity; idx++) { \
-    CHECK_EXEC_RES_RET_RES(TYPE##_dtor(vec-&gt;data + idx), res, res); \
+  CATCH { \
+    return code; \
   } \
-  free(vec-&gt;data); \
-  vec-&gt;data = NULL; \
-  return res; \
+  return 0; \
 } \
-QUAL ctl_res_ctl_vec_##TYPE##_p ctl_vec_##TYPE##_new(size_t size) { \
-  ctl_res_ctl_vec_##TYPE##_p res = {0}; \
-  res.ec = EOK; \
-  ctl_res_void res_void = {0}; \
-  res_void.ec = EOK; \
-  ctl_vec_##TYPE *vec = (ctl_vec_##TYPE *)malloc(sizeof(ctl_vec_##TYPE)); \
-  CHECK_COND_RET_RES(NULL != vec, EOOM, res); \
-  res.value = vec; \
-  CHECK_EXEC_RES_POSTPROC_RET_RES(ctl_vec_##TYPE##_ctor_with_size(res.value, size), res_void, res, free(vec)); \
-  return res; \
+QUAL int ctl_vec_##TYPE##_ctor(ctl_vec_##TYPE *vec) { \
+  int code = 0; \
+  TRY { \
+    CHECK(ctl_vec_##TYPE##_ctor_by_size(vec, CTL_VEC_MINIMAL_SIZE)) ; \
+  } CATCH { \
+    return code; \
+  } \
+  return 0; \
 } \
-QUAL ctl_res_void ctl_vec_##TYPE##_free(ctl_vec_##TYPE *vec) { \
-  ctl_res_void res = {0}; \
-  res.ec = EOK; \
-  CHECK_EXEC_RES_RET_RES(ctl_vec_##TYPE##_dtor(vec), res, res); \
-  free(vec); \
-  return res; \
+QUAL void ctl_vec_##TYPE##_dtor(ctl_vec_##TYPE *vec) { \
+  int code = 0; \
+  TRY {
+    /* 销毁就要销毁所有分配的内存 */ \
+    for (size_t idx = 0; idx &lt; vec-&gt;capacity; idx++) { \
+      CHECK(TYPE##_dtor(vec-&gt;data + idx)); \
+    } \
+    free(vec-&gt;data); \
+    vec-&gt;data = NULL; \
+  } CATCH { \
+    return code; \
+  } \
+  return 0; \
 } \
-QUAL ctl_res_void ctl_vec_##TYPE##_clear(ctl_vec_##TYPE* vec) { \
+QUAL void ctl_vec_##TYPE##_clear(ctl_vec_##TYPE* vec) { \
   ctl_res_void res = {0}; \
   res.ec = EOK; \
   vec-&gt;begin_idx = 0U; \
   vec-&gt;size = 0U; \
-  return res; \
+  return; \
 } \
-QUAL ctl_res_void ctl_vec_##TYPE##_reserve(ctl_vec_##TYPE *vec, size_t new_capacity) { \
-  ctl_res_void res = {0}; \
-  res.ec = EOK; \
-  CHECK_COND_RET_RES(new_capacity != 0, EINVALID_PARAM, res); \
-  if (new_capacity &lt;= vec-&gt;capacity) { \
-    return res; \
+QUAL int ctl_vec_##TYPE##_reserve(ctl_vec_##TYPE *vec, size_t new_capacity) { \
+  int code = 0; \
+  TRY {
+    CHECK_NOT_EQ(new_capacity, 0); \
+    if (new_capacity &lt;= vec-&gt;capacity) { \
+      return code; \
+    } \
+    vec-&gt;capacity = new_capacity; \
+    /* 先申请内存，然后初始化 */ \
+    TYPE *new_data = (TYPE *)malloc(vec-&gt;capacity * sizeof(TYPE)); \
+    CHECK_NONNULL(new_data); \
+    for (size_t idx = 0u; idx &lt; vec-&gt;capacity; idx++) { \
+      CHECK(TYPE##_ctor(new_data + idx)); \
+    } \
+    /* 把旧的内容拷贝过来 */ \
+    for (size_t idx = 0; idx &lt; vec-&gt;size; idx++) { \
+      CHECK(TYPE##_copy(new_data + idx, vec-&gt;data + idx)); \
+    } \
+    /* 销毁掉旧的内容 */ \
+    for (size_t idx = 0; idx &lt; vec-&gt;capacity; idx++) { \
+      TYPE##_dtor(vec-&gt;data + idx); \
+    } \
+    free(vec-&gt;data); \
+    vec-&gt;data = new_data; \
   } \
-  vec-&gt;capacity = new_capacity; \
-  /* 先申请内存，然后初始化 */ \
-  TYPE *new_data = (TYPE *)malloc(vec-&gt;capacity * sizeof(TYPE)); \
-  CHECK_COND_RET_RES(new_data != NULL, EOOM, res); \
-  for (size_t idx = 0; idx &lt; vec-&gt;capacity; idx++) { \
-    CHECK_EXEC_RES_RET_RES(TYPE##_ctor(new_data + idx), res, res); \
+  CATCH { \
+    return code; \
   } \
-  /* 把旧的内容拷贝过来 */ \
-  for (size_t idx = 0; idx &lt; vec-&gt;size; idx++) { \
-    CHECK_EXEC_RES_RET_RES(TYPE##_copy(new_data + idx, vec-&gt;data + idx), res, res); \
-  } \
-  /* 销毁掉旧的内容 */ \
-  for (size_t idx = 0; idx &lt; vec-&gt;capacity; idx++) { \
-    CHECK_EXEC_RES_RET_RES(TYPE##_dtor(vec-&gt;data + idx), res, res); \
-  } \
-  free(vec-&gt;data); \
-  vec-&gt;data = new_data; \
-  return res; \
+  return 0; \
 } \
-QUAL ctl_res_void ctl_vec_##TYPE##_resize(ctl_vec_##TYPE *vec, size_t new_size) { \
-  ctl_res_void res = {0}; \
-  res.ec = EOK; \
-  if (vec-&gt;begin_idx + new_size &gt; vec-&gt;capacity) { \
-    CHECK_EXEC_RES_RET_RES(ctl_vec_##TYPE##_reserve(vec, vec-&gt;begin_idx + new_size), res, res); \
+QUAL int ctl_vec_##TYPE##_resize(ctl_vec_##TYPE *vec, size_t new_size) { \
+  int code = 0; \
+  TRY { \
+    if (vec-&gt;begin_idx + new_size &gt; vec-&gt;capacity) { \
+      CHECK(ctl_vec_##TYPE##_reserve(vec, vec-&gt;begin_idx + new_size)); \
+    } \
+    vec-&gt;size = new_size; \
   } \
-  vec-&gt;size = new_size; \
-  return res; \
+  CATCH { \
+    return code; \
+  } \
+  return 0; \
 } \
-QUAL ctl_res_void ctl_vec_##TYPE##_copy(ctl_vec_##TYPE *dst, const ctl_vec_##TYPE *src) { \
-  ctl_res_void res = {0}; \
-  res.ec = EOK; \
-  dst-&gt;size = src-&gt;size; \
-  /* 如果src的capacity已经比dst的capacity更大，那dst就要释放掉之前的内存，然后重新申请内存 */ \
-  if (dst-&gt;capacity &lt; src-&gt;size) { \
-    if (dst-&gt;data) { \
-      /* 释放掉dst的资源 */ \
-      for (size_t idx = 0; idx &lt; dst-&gt;capacity; idx++) { \
-        CHECK_EXEC_RES_RET_RES(TYPE##_dtor(dst-&gt;data + idx), res, res); \
+QUAL int ctl_vec_##TYPE##_copy(ctl_vec_##TYPE *dst, const ctl_vec_##TYPE *src) { \
+  int code = 0;
+  TRY { \
+    dst-&gt;size = src-&gt;size; \
+    /* 如果src的capacity已经比dst的capacity更大，那dst就要释放掉之前的内存，然后重新申请内存 */ \
+    if (dst-&gt;capacity &lt; src-&gt;size) { \
+      if (dst-&gt;data) { \
+        /* 释放掉dst的资源 */ \
+        for (size_t idx = 0; idx &lt; dst-&gt;capacity; idx++) { \
+          TYPE##_dtor(dst-&gt;data + idx); \
+        } \
+        free(dst-&gt;data); \
       } \
-      free(dst-&gt;data); \
+      /* 必须要最后赋值，因为先释放后申请 */ \
+      dst-&gt;capacity = src-&gt;size; \
+      /* 为dst申请资源然后初始化 */ \
+      dst-&gt;data = (TYPE *)malloc(dst-&gt;capacity * sizeof(TYPE)); \
+      CHECK_COND_RET_RES(dst-&gt;data != NULL, EOOM, res); \
+      for (size_t idx = 0; idx &lt; src-&gt;size; idx++) { \
+        CHECK_EXEC_RES_RET_RES(TYPE##_ctor(dst-&gt;data + idx), res, res); \
+      } \
     } \
-    /* 必须要最后赋值，因为先释放后申请 */ \
-    dst-&gt;capacity = src-&gt;size; \
-    /* 为dst申请资源然后初始化 */ \
-    dst-&gt;data = (TYPE *)malloc(dst-&gt;capacity * sizeof(TYPE)); \
-    CHECK_COND_RET_RES(dst-&gt;data != NULL, EOOM, res); \
+    dst-&gt;begin_idx = 0; \
+    dst-&gt;size = src-&gt;size; \
+    /* 然后拷贝 */ \
     for (size_t idx = 0; idx &lt; src-&gt;size; idx++) { \
-      CHECK_EXEC_RES_RET_RES(TYPE##_ctor(dst-&gt;data + idx), res, res); \
+      CHECK(TYPE##_copy(dst-&gt;data + idx, src-&gt;data + (idx + src-&gt;begin_idx))); \
     } \
   } \
-  dst-&gt;begin_idx = 0; \
-  dst-&gt;size = src-&gt;size; \
-  /* 然后拷贝 */ \
-  for (size_t idx = 0; idx &lt; src-&gt;size; idx++) { \
-    CHECK_EXEC_RES_RET_RES(TYPE##_copy(dst-&gt;data + idx, src-&gt;data + (idx + src-&gt;begin_idx)), res, res); \
+  CATCH { \
+    return code; \
   } \
-  return res; \
+  return 0; \
 } \
-QUAL ctl_res_##TYPE ctl_vec_##TYPE##_get_at(ctl_vec_##TYPE *vec, size_t index) { \
-  ctl_res_##TYPE res = {0}; \
-  res.ec = EOK; \
-  CHECK_COND_RET_RES (index &lt; vec-&gt;size, EINDEX_OVERFLOW, res); \
-  ctl_res_void res_void = {0}; \
-  res_void.ec =  EOK; \
-  CHECK_EXEC_RES_RET_RES(TYPE##_copy(&amp;(res.value), vec-&gt;data + (vec-&gt;begin_idx + index)), res_void, res); \
-  return res; \
+QUAL int ctl_vec_##TYPE##_get_at(ctl_vec_##TYPE *vec, size_t index, TYPE* data) { \
+  int code = 0; \
+  TRY { \
+    CHECK_INDEX (index, vec-&gt;size); \
+    CHECK(TYPE##_copy(data, vec-&gt;data + (vec-&gt;begin_idx + index))); \
+  }
+  CATCH { \
+    return code; \
+  } \
+  return 0; \
 } \
-QUAL ctl_res_void ctl_vec_##TYPE##_set_at(ctl_vec_##TYPE *vec, size_t index, const TYPE value) { \
-  ctl_res_void res = {0}; \
-  res.ec = EOK; \
-  CHECK_COND_RET_RES (index &lt; vec-&gt;size, EINDEX_OVERFLOW, res); \
-  CHECK_EXEC_RES_RET_RES(TYPE##_copy(vec-&gt;data + (vec-&gt;begin_idx + index), &amp;value), res, res); \
+QUAL int ctl_vec_##TYPE##_set_at(ctl_vec_##TYPE *vec, size_t index, const TYPE value) { \
+  int code = 0;
+  TRY { \
+    CHECK_INDEX (index, vec-&gt;size); \
+    CHECK(TYPE##_copy(vec-&gt;data + (vec-&gt;begin_idx + index), &amp;value)); \
+  } \
+  CATCH { \
+    return code; \
+  } \
   return res; \
 } \
 QUAL ctl_res_void ctl_vec_##TYPE##_grow(ctl_vec_##TYPE *vec) { \
@@ -306,25 +316,31 @@ QUAL ctl_res_void ctl_vec_##TYPE##_grow(ctl_vec_##TYPE *vec) { \
   CHECK_EXEC_RES_RET_RES(ctl_vec_##TYPE##_reserve(vec, new_capacity), res, res); \
   return res; \
 } \
-QUAL ctl_res_void ctl_vec_##TYPE##_push_back(ctl_vec_##TYPE *vec, const TYPE data) { \
-  ctl_res_void res = {0}; \
-  res.ec = EOK; \
-  if (vec-&gt;capacity == (vec-&gt;begin_idx + vec-&gt;size)) { \
-    ctl_vec_##TYPE##_grow(vec); \
+QUAL int ctl_vec_##TYPE##_push_back(ctl_vec_##TYPE *vec, const TYPE data) { \
+  int code = 0; \
+  TRY { \
+    if (vec-&gt;capacity == (vec-&gt;begin_idx + vec-&gt;size)) { \
+      ctl_vec_##TYPE##_grow(vec); \
+    } \
+    CHECK(TYPE##_copy(vec-&gt;  data + (vec-&gt;begin_idx + vec-&gt;size), &amp;data)); \
+    vec-&gt;size++; \
   } \
-  CHECK_EXEC_RES_RET_RES(TYPE##_copy(vec-&gt;  data + (vec-&gt;begin_idx + vec-&gt;size), &amp;data), res, res); \
-  vec-&gt;size++; \
-  return res; \
+  CATCH { \
+    return code; \
+  } \
+  return 0; \
 } \
-QUAL ctl_res_##TYPE ctl_vec_##TYPE##_pop_back(ctl_vec_##TYPE *vec) { \
-  ctl_res_##TYPE res = {0}; \
-  res.ec = EOK; \
-  ctl_res_void res_void = {0}; \
-  res_void.ec = EOK; \
-  CHECK_COND_RET_RES (vec-&gt;size != 0, EEMPTY, res); \
-  CHECK_EXEC_RES_RET_RES(TYPE##_copy(&amp;(res.value), vec-&gt; data + (vec-&gt;begin_idx + vec-&gt;size - 1U)), res_void, res); \
-  vec-&gt;size--; \
-  return res; \
+QUAL int ctl_vec_##TYPE##_pop_back(ctl_vec_##TYPE *vec, TYPE* data) { \
+  int code = 0; \
+  TRY { \
+    CHECK_NOT_EQ (vec-&gt;size, 0); \
+    CHECK(TYPE##_copy(&amp;(res.value), vec-&gt; data + (vec-&gt;begin_idx + vec-&gt;size - 1u))); \
+    vec-&gt;size--; \
+  } \
+  CATCH { \
+    return code; \
+  } \
+  return 0; \
 }
 #define IMPL_VEC(TYPE) IMPL_QUAL_VEC(TYPE, )
 #define IMPL_STATIC_VEC(TYPE) IMPL_QUAL_VEC(TYPE, static)
