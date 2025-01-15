@@ -177,9 +177,17 @@ int vector_ctor_by_size(vector *vec, size_t size) {
     }
   }
   return 0;
-
 }
 
+void vector_dtor(vector *vec) {
+  char* data_p = (char*)vec-&gt;data;
+  for (size_t idx = 0; idx &lt; vec-&gt;capacity; idx++) {
+    vec-&gt;icd.dtor(data_p + idx * vec-&gt;icd.size);
+  }
+  free(vec-&gt;data);
+  vec-&gt;data = NULL;
+  return;
+}
 
 </code></pre>
               
