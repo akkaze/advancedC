@@ -203,8 +203,8 @@ add(dst, lhs, rhs, num, sizeof(float), add_float_func_t);
 typedef struct
 {
     int data;
-    list_t list;
-} Node;
+    struct link* list;
+} node;
 </code></pre>
 <p>侵入式链表的优点：</p>
 <ul>
