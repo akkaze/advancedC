@@ -285,9 +285,9 @@ int vector_resize(vector *vec, size_t new_size) {
 
 int vector_get_at(vector *vec, size_t index, void* elem) {
   int code = 0;
+  char* data_p = (char*)vec-&gt;data;
   TRY {
     CHECK_INDEX (index, vec-&gt;size);
-    char* data_p = (char*)vec-&gt;data;
     memcpy(elem, data_p + index * vec-&gt;icd.size, size);
     if (vec-&gt;icd.copy)
       CHECK(vec-&gt;icd.copy(elem, data_p + index * vec-&gt;icd.size));
@@ -307,6 +307,49 @@ int vector_set_at(vector *vec, size_t index, void* elem) {
       CHECK(vec-&gt;icd.copy(data_p + index * vec-&gt;icd.size, elem));
   }
   CATCH {
+    return code;
+  }
+  return 0;
+}
+
+int vector_grow(vector *vec) {
+  int code = 0;
+  size_t new_capacity = vec-&gt;capacity * CTL_VEC_GROW_FACTOR;
+  TRY {
+    CHECK(vector_reserve(vec, new_capacity));
+  }
+  CATCH {
+    return code;
+  }
+  return 0;
+}
+
+int vector_push_back(vector *vec, const void* elem) {
+  int code = 0;
+  char* data_p = (char*)vec-&gt;data;
+  TRY {
+    if (vec-&gt;capacity == (vec-&gt;begin_idx + vec-&gt;size)) {
+      CHECK(vector_grow(vec));
+    }
+    memcpy(vec-&gt;icd.copy(data_p + (vec-&gt;begin_idx + vec-&gt;size), elem, vec-&gt;icd.size));
+    if (vec-&gt;icd.copy)
+      CHECK(vec-&gt;icd.copy(data_p + (vec-&gt;begin_idx + vec-&gt;size), elem));
+    vec-&gt;size++;
+  }
+  CATCH {
+    return code;
+  }
+  return 0;
+}
+int vector_pop_back(vector *vec, void* elem) {
+  int code = 0;
+  TRY {
+    CHECK_NOT_EQ (vec-&gt;size, 0);
+    memcpy(elem, vec-&gt;icd.copy(data_p + (vec-&gt;begin_idx + vec-&gt;size), vec-&gt;icd.size));
+    if (vec-&gt;icd.copy)
+      CHECK(elem, vec-&gt;icd.copy(data_p + (vec-&gt;begin_idx + vec-&gt;size)));
+    vec-&gt;size--;
+  } CATCH {
     return code;
   }
   return 0;

@@ -77,28 +77,64 @@
     <li class="toctree-l2"><a class="reference internal" href="#bug_1">算术BUG</a>
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#_1">加法</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#_2">整数加法上溢出</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_2">减法</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_3">整数加法下溢出</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_3">乘法</a>
+        </ul>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_4">除法</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_4">减法</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#_5">整数减法上溢出</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#_6">整数减法下溢出</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_7">乘法</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#_8">整数乘法上溢出</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#_9">整数乘法下溢出</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#inf">浮点数inf</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_10">除法和模运算</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#_11">整数除零</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#_12">浮点数除零</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_13">移位</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#_14">有符号整数左移溢出</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#_15">无符号整数左移溢出</a>
+    </li>
+        </ul>
     </li>
         </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#bug_2">内存BUG</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#_5">内存越界</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_16">内存越界</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_6">内存泄漏</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_17">内存泄漏</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_7">野指针</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_18">野指针</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#_8">空指针</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_19">空指针</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#_9">随机指针</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_20">随机指针</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#_10">悬垂指针</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_21">悬垂指针</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#_22">双重释放</a>
     </li>
         </ul>
     </li>
@@ -106,13 +142,13 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#bug_3">并发BUG</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#_11">死锁</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_23">死锁</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_12">不可重入锁重入</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_24">不可重入锁重入</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_13">锁在同一线程多次释放</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_25">锁在同一线程多次释放</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_14">数据读写竞争</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_26">数据读写竞争</a>
     </li>
         </ul>
     </li>
@@ -165,21 +201,34 @@
                 <h1 id="bug">基础BUG</h1>
 <h2 id="bug_1">算术BUG</h2>
 <h3 id="_1">加法</h3>
-<h3 id="_2">减法</h3>
-<h3 id="_3">乘法</h3>
-<h3 id="_4">除法</h3>
+<h4 id="_2">整数加法上溢出</h4>
+<h4 id="_3">整数加法下溢出</h4>
+<h3 id="_4">减法</h3>
+<h4 id="_5">整数减法上溢出</h4>
+<h4 id="_6">整数减法下溢出</h4>
+<h3 id="_7">乘法</h3>
+<h4 id="_8">整数乘法上溢出</h4>
+<h4 id="_9">整数乘法下溢出</h4>
+<h4 id="inf">浮点数inf</h4>
+<h3 id="_10">除法和模运算</h3>
+<h4 id="_11">整数除零</h4>
+<h4 id="_12">浮点数除零</h4>
+<h3 id="_13">移位</h3>
+<h4 id="_14">有符号整数左移溢出</h4>
+<h4 id="_15">无符号整数左移溢出</h4>
 <h2 id="bug_2">内存BUG</h2>
-<h3 id="_5">内存越界</h3>
-<h3 id="_6">内存泄漏</h3>
-<h3 id="_7">野指针</h3>
-<h4 id="_8">空指针</h4>
-<h4 id="_9">随机指针</h4>
-<h4 id="_10">悬垂指针</h4>
+<h3 id="_16">内存越界</h3>
+<h3 id="_17">内存泄漏</h3>
+<h3 id="_18">野指针</h3>
+<h4 id="_19">空指针</h4>
+<h4 id="_20">随机指针</h4>
+<h4 id="_21">悬垂指针</h4>
+<h4 id="_22">双重释放</h4>
 <h2 id="bug_3">并发BUG</h2>
-<h3 id="_11">死锁</h3>
-<h3 id="_12">不可重入锁重入</h3>
-<h3 id="_13">锁在同一线程多次释放</h3>
-<h3 id="_14">数据读写竞争</h3>
+<h3 id="_23">死锁</h3>
+<h3 id="_24">不可重入锁重入</h3>
+<h3 id="_25">锁在同一线程多次释放</h3>
+<h3 id="_26">数据读写竞争</h3>
               
             </div>
           </div><footer>
