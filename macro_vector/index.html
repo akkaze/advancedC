@@ -163,7 +163,7 @@ QUAL size_t ctl_vec_##TYPE##_size(ctl_vec_##TYPE* vec) { \
 QUAL size_t ctl_vec_##TYPE##_begin_idx(ctl_vec_##TYPE* vec) { \
   return vec-&gt;begin_idx; \
 } \
-QUAL ctl_res_void ctl_vec_##TYPE##_ctor_with_size(ctl_vec_##TYPE *vec, size_t size) { \
+QUAL ctl_res_void ctl_vec_##TYPE##_ctor_by_size(ctl_vec_##TYPE *vec, size_t size) { \
   ctl_res_void res_void = {0}; \
   res_void.ec = EOK; \
   vec-&gt;begin_idx = 0; \

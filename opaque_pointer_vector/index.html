@@ -124,9 +124,10 @@
               
                 <h1 id="voidvector">使用void*实现通用vector</h1>
 <h2 id="icd">icd函数</h2>
-<pre><code class="language-c">typedef (init_func_t*)(void*);
-typedef (copy_func_t*)(void*, void*);
-typedef (dtor_func_t*)(void*);
+<pre><code class="language-c">typedef int (init_func_t*)(void*);
+typedef int (copy_func_t*)(void*, void*);
+// 析构函数通常不返回错误码，防止嵌套错误，如果遇到错误，一般直接exit
+typedef void (dtor_func_t*)(void*);
 
 typedef struct icd_s {
   size_t size;
@@ -150,6 +151,35 @@ size_t vector_size(vector* vec) {
 size_t vector_begin_idx(vector* vec) {
   return vec-&gt;begin_idx;
 }
+
+int vector_ctor_by_size(vector *vec, size_t size) {
+  int code = 0;
+  TRY {
+    vec-&gt;begin_idx = 0;
+    vec-&gt;size = size;
+    vec-&gt;capacity = size;
+    vec-&gt;data = malloc(vec-&gt;capacity * vec-&gt;icd.size);
+    CHECK_NONNULL(vec-&gt;data)
+    /* 初始化就要初始化所有分配的内存 */
+    char* data_p = (char*)vec-&gt;data;
+    for (size_t idx = 0; idx &lt; vec-&gt;capacity; idx++) {
+      CHECK(vec-&gt;icd.init(data_p + idx * vec-&gt;icd.size));
+    }
+    return 0;
+  }
+  CATCH {
+    if (vec-&gt;data) {
+      char* data_p = (char*)vec-&gt;data;
+      for (size_t idx = 0; idx &lt; vec-&gt;capacity; idx++) {
+        vec-&gt;icd.dtor(data_p + idx * vec-&gt;icd.size);
+      }
+      free(vec-&gt;data);
+    }
+  }
+  return 0;
+
+}
+
 
 </code></pre>
               

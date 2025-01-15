@@ -194,7 +194,10 @@ cleanup:
     goto cleanup;                                                              \
   }                                                                            \
 }
-#define CHECK_NONULL(ptr) if (!(ptr)) goto cleanup;
+#define CHECK_NONULL(ptr) if (!(ptr)) {                 \
+  code = E_MEM;                                         \
+  goto cleanup;                                         \
+}
 </code></pre>
 <pre><code class="language-c">int main() {
   int* result = NULL;
