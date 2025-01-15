@@ -179,7 +179,8 @@ void add_float(void* dst, void* lhs, void* rhs) {
 add(dst, lhs, rhs, num, sizeof(float), add_float);
 </code></pre>
 <h2 id="_5">侵入式容器</h2>
-<p>普通链表：
+<p><strong>注意：侵入式容器并不是真正的模板，它只能复用带有链的数据结构的逻辑，诸如链表，树和图等</strong>
+普通链表：
 我们经常使用的普通链表是每个节点的next指针指向下一个节点的首地址：</p>
 <pre><code class="language-c">struct node
 {    
@@ -195,7 +196,7 @@ add(dst, lhs, rhs, num, sizeof(float), add_float);
 侵入式链表的节点的链接成员指向的是下一个节点的链接成员：</li>
 </ul>
 <p>节点结构如下：</p>
-<pre><code class="language-c">typedef struct link
+<pre><code class="language-c">typ**edef struct link
 {
     struct link* next;
 }list_t;
