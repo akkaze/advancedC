@@ -179,6 +179,129 @@ void add_float_func_t(void* dst, void* lhs, void* rhs) {
 add(dst, lhs, rhs, num, sizeof(float), add_float_func_t);
 </code></pre>
 <h2 id="_5">侵入式容器</h2>
+<p>普通链表：
+我们经常使用的普通链表是每个节点的next指针指向下一个节点的首地址：</p>
+<pre><code class="language-c">struct node
+{    
+    int data;
+    struct node* next;
+}
+</code></pre>
+<p>普通链表的缺点：</p>
+<ul>
+<li>一条链表上的所有节点的数据类型需要完全一致</li>
+<li>对某条链表的操作如插入，删除等只能对这种类型的链表进行操作，如果链表的类型换了，就要重新再封装出一套一样的操作，泛化能力差
+侵入式链表：
+侵入式链表的节点的链接成员指向的是下一个节点的链接成员：</li>
+</ul>
+<p>节点结构如下：</p>
+<pre><code class="language-c">typedef struct link
+{
+    struct link* next;
+}list_t;
+
+typedef struct
+{
+    int data;
+    list_t list;
+} Node;
+</code></pre>
+<p>侵入式链表的优点：</p>
+<ul>
+<li>节点类型无需一致，只需要包含list_t成员即可</li>
+<li>泛化能力强，所有链表的操作方式均可统一；
+访问侵入式链表中的节点数据，需要使用offsetof和container_of</li>
+</ul>
+<pre><code class="language-c">typedef struct link
+{
+    struct link* next;
+    struct link* prev;
+} list_t;
+
+
+#define LIST_HEAD_INIT(name)    {&amp;(name), &amp;(name)}
+#define LIST_HEAD(name)         list_t name = LIST_HEAD_INIT(name)
+
+
+#define list_entry(node, type, member) \
+    container_of(node, type, member)
+
+// 下面这些api都是通用的，无论data是数据类型
+#define list_for_each(pos, head) \
+    for (pos = (head)-&gt;next; pos != (head); pos = pos-&gt;next)
+
+
+#define list_for_each_safe(pos, n, head) \
+  for (pos = (head)-&gt;next, n = pos-&gt;next; pos != (head); \
+    pos = n, n = pos-&gt;next)
+
+
+void list_init(list_t* list);
+void list_insert_after(list_t* list, list_t* node);
+void list_insert_before(list_t* list, list_t* node);
+void list_remove(list_t* node);
+int list_isempty(const list_t* list);
+unsigned int list_len(const list_t* list);
+</code></pre>
+<p>已知link的情况下，如何拿到data的值</p>
+<pre><code class="language-c">struct node
+{    
+    int data;
+    list_t link;
+}
+list_t link_p;
+int val = list_entry(link_p, struct node, link)-&gt;data;
+</code></pre>
+<p>以下实现都是通用的</p>
+<pre><code class="language-c">#include &quot;link_list.h&quot;
+
+void list_init(list_t* list)
+{
+    list-&gt;next = list-&gt;prev = list;
+}
+
+void list_insert_after(list_t* list, list_t* node)
+{
+    list-&gt;next-&gt;prev = node;
+    node-&gt;next = list-&gt;next;
+
+    list-&gt;next = node;
+    node-&gt;prev = list;
+}
+
+void list_insert_before(list_t* list, list_t* node) 
+{
+    list-&gt;prev-&gt;next = node;
+    node-&gt;prev = list-&gt;prev;
+    list-&gt;prev = node;
+    node-&gt;next = list;
+}
+
+void list_remove(list_t* node)
+{
+    node-&gt;next-&gt;prev = node-&gt;prev;
+    node-&gt;prev-&gt;next = node-&gt;next;
+
+    node-&gt;next = node-&gt;prev = node;
+}
+
+int list_isempty(const list_t* list)
+{
+    return list-&gt;next == list;
+}
+
+unsigned int list_len(const list_t* list)
+{
+    unsigned int len = 0;
+    const list_t* p = list;
+    while (p-&gt;next != list)
+    {
+        p = p-&gt;next;
+        len++;
+    }
+    return len;
+}
+</code></pre>
               
             </div>
           </div><footer>
