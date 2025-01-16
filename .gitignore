@@ -1,1 +1,7 @@
 /site/*
+*.h
+*.c
+*.cc
+*.hpp
+*.cpp
+.clang-format

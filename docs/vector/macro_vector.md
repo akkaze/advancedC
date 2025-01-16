@@ -72,7 +72,7 @@ QUAL int ctl_vec_##TYPE##_ctor(ctl_vec_##TYPE *vec) { \
 } \
 QUAL void ctl_vec_##TYPE##_dtor(ctl_vec_##TYPE *vec) { \
   int code = 0; \
-  TRY {
+  TRY { \
     /* 销毁就要销毁所有分配的内存 */ \
     for (size_t idx = 0; idx < vec->capacity; idx++) { \
       CHECK(TYPE##_dtor(vec->data + idx)); \
@@ -93,7 +93,7 @@ QUAL void ctl_vec_##TYPE##_clear(ctl_vec_##TYPE* vec) { \
 } \
 QUAL int ctl_vec_##TYPE##_reserve(ctl_vec_##TYPE *vec, size_t new_capacity) { \
   int code = 0; \
-  TRY {
+  TRY { \
     CHECK_NOT_EQ(new_capacity, 0); \
     if (new_capacity <= vec->capacity) { \
       return code; \
@@ -135,7 +135,7 @@ QUAL int ctl_vec_##TYPE##_resize(ctl_vec_##TYPE *vec, size_t new_size) { \
   return 0; \
 } \
 QUAL int ctl_vec_##TYPE##_copy(ctl_vec_##TYPE *dst, const ctl_vec_##TYPE *src) { \
-  int code = 0;
+  int code = 0; \
   TRY { \
     dst->size = src->size; \
     /* 如果src的capacity已经比dst的capacity更大，那dst就要释放掉之前的内存，然后重新申请内存 */ \
@@ -173,14 +173,14 @@ QUAL int ctl_vec_##TYPE##_get_at(ctl_vec_##TYPE *vec, size_t index, TYPE* data) 
   TRY { \
     CHECK_INDEX (index, vec->size); \
     CHECK(TYPE##_copy(data, vec->data + (vec->begin_idx + index))); \
-  }
+  } \
   CATCH { \
     return code; \
   } \
   return 0; \
 } \
 QUAL int ctl_vec_##TYPE##_set_at(ctl_vec_##TYPE *vec, size_t index, const TYPE value) { \
-  int code = 0;
+  int code = 0; \
   TRY { \
     CHECK_INDEX (index, vec->size); \
     CHECK(TYPE##_copy(vec->data + (vec->begin_idx + index), &value)); \
