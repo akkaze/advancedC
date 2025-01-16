@@ -5,15 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../img/favicon.ico" />
-    <title>静态检查 - C语言高级技巧</title>
+    <title>调试方法 - C语言高级技巧</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "\u9759\u6001\u68c0\u67e5";
-        var mkdocs_page_input_path = "static_check.md";
+        var mkdocs_page_name = "\u8c03\u8bd5\u65b9\u6cd5";
+        var mkdocs_page_input_path = "debug.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -87,16 +87,50 @@
                 <li class="toctree-l1"><a class="reference internal" href="../test_driven/">测试驱动</a>
                 </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../debug/">调试方法</a>
-                </li>
-              </ul>
               <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href="#">静态检查</a>
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">调试方法</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#cppcheck">cppcheck</a>
+    <li class="toctree-l2"><a class="reference internal" href="#_2">日志</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_3">日志级别</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_4">调试器</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_5">通用概念</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#_6">普通断点</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#_7">条件断点</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#_8">单步调试</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#_9">跳入跳出函数</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#gdb">gdb</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#_10">普通断点</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#_11">单步调试</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#_12">跳入跳出函数</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#lldb">lldb</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#windbg">windbg</a>
+    </li>
+        </ul>
     </li>
     </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../static_check/">静态检查</a>
                 </li>
               </ul>
               <ul>
@@ -125,7 +159,7 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
-      <li class="breadcrumb-item active">静态检查</li>
+      <li class="breadcrumb-item active">调试方法</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -134,14 +168,41 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="_1">静态检查</h1>
-<h2 id="cppcheck">cppcheck</h2>
+                <h1 id="_1">调试方法</h1>
+<h2 id="_2">日志</h2>
+<h3 id="_3">日志级别</h3>
+<ul>
+<li>INFO</li>
+<li>DEBUG</li>
+<li>WARN</li>
+<li>ERROR</li>
+<li>FATAL</li>
+<li>TRACE</li>
+</ul>
+<h2 id="_4">调试器</h2>
+<h3 id="_5">通用概念</h3>
+<h4 id="_6">普通断点</h4>
+<h4 id="_7">条件断点</h4>
+<h4 id="_8">单步调试</h4>
+<h4 id="_9">跳入跳出函数</h4>
+<p>因为每一行c代码都可能有多个函数，所以一般情况下断在一行代码上，跳入的可能并不是自己期望的函数，所以需要先跳出，然后继续跳入，直至跳入期望的函数。</p>
+<h3 id="gdb">gdb</h3>
+<h4 id="_10">普通断点</h4>
+<p>gdb可以断在某一行，或者某个函数上，使用命令break，或者n。
+断在某一行，例如 b test.c:100
+断在某个函数上，例如 b func</p>
+<h4 id="_11">单步调试</h4>
+<p>使用next命令，或者n。</p>
+<h4 id="_12">跳入跳出函数</h4>
+<p>对于gdb而言，跳入函数使用step命令，或s。跳出函数使用finish命令，或fin。</p>
+<h3 id="lldb">lldb</h3>
+<h3 id="windbg">windbg</h3>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../debug/" class="btn btn-neutral float-left" title="调试方法"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../dynamic_analysis/" class="btn btn-neutral float-right" title="动态分析">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../test_driven/" class="btn btn-neutral float-left" title="测试驱动"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../static_check/" class="btn btn-neutral float-right" title="静态检查">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -164,10 +225,10 @@
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../debug/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../test_driven/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../dynamic_analysis/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../static_check/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

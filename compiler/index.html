@@ -5,15 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../img/favicon.ico" />
-    <title>静态检查 - C语言高级技巧</title>
+    <title>常用编译器 - C语言高级技巧</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "\u9759\u6001\u68c0\u67e5";
-        var mkdocs_page_input_path = "static_check.md";
+        var mkdocs_page_name = "\u5e38\u7528\u7f16\u8bd1\u5668";
+        var mkdocs_page_input_path = "compiler.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -75,8 +75,26 @@
                 <li class="toctree-l1"><a class="reference internal" href="../bugs/">基础BUG</a>
                 </li>
               </ul>
-              <ul>
-                <li class="toctree-l1"><a class="reference internal" href="../compiler/">常用编译器</a>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">常用编译器</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#unixlinuxmacos">类unix系统（linux，macos）</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#gcc">gcc</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#clang">clang</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#windows">windows</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#mingw-gcc">mingw-gcc</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#msvc">msvc</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
                 </li>
               </ul>
               <ul>
@@ -91,12 +109,8 @@
                 <li class="toctree-l1"><a class="reference internal" href="../debug/">调试方法</a>
                 </li>
               </ul>
-              <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href="#">静态检查</a>
-    <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#cppcheck">cppcheck</a>
-    </li>
-    </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../static_check/">静态检查</a>
                 </li>
               </ul>
               <ul>
@@ -125,7 +139,7 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
-      <li class="breadcrumb-item active">静态检查</li>
+      <li class="breadcrumb-item active">常用编译器</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -134,14 +148,19 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="_1">静态检查</h1>
-<h2 id="cppcheck">cppcheck</h2>
+                <h1 id="_1">常用编译器</h1>
+<h2 id="unixlinuxmacos">类unix系统（linux，macos）</h2>
+<h3 id="gcc">gcc</h3>
+<h3 id="clang">clang</h3>
+<h2 id="windows">windows</h2>
+<h3 id="mingw-gcc">mingw-gcc</h3>
+<h3 id="msvc">msvc</h3>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../debug/" class="btn btn-neutral float-left" title="调试方法"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../dynamic_analysis/" class="btn btn-neutral float-right" title="动态分析">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../bugs/" class="btn btn-neutral float-left" title="基础BUG"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../build_system/" class="btn btn-neutral float-right" title="构建系统">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -164,10 +183,10 @@
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../debug/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../bugs/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../dynamic_analysis/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../build_system/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
