@@ -60,11 +60,17 @@
     </li>
         </ul>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_5">变量的声明和定义</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_6">函数的声明和定义</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_5">定义相关概念</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#_7">传值和传地址</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_6">链接方式</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_7">变量的声明和定义</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_8">函数的声明和定义</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#_9">传值和传地址</a>
     </li>
         </ul>
     </li>
@@ -171,13 +177,39 @@
 <p>如<code>const</code>、<code>volatile</code>、<code>restrict</code></p>
 <h4 id="_4">类型修饰符</h4>
 <p><code>unsigned</code> <code>signed</code></p>
-<h3 id="_5">变量的声明和定义</h3>
+<h3 id="_5">定义相关概念</h3>
+<h4 id="_6">链接方式</h4>
+<p>在 C 语言中，变量的链接方式主要分为三种：外部链接（External Linkage）、内部链接（Internal Linkage） 和 无链接（No Linkage）。</p>
+<h5 id="external-linkage">外部链接（External Linkage）</h5>
+<p>具有外部链接的变量可以被其他文件中的代码访问。例如非static的全局变量。</p>
+<pre><code class="language-c">// file1.c
+int global_var = 10; // 外部链接
+
+// file2.c
+extern int global_var; // 引用外部变量
+</code></pre>
+<h5 id="internal-linkage">内部链接（Internal Linkage）</h5>
+<p>具有内部链接的变量只能在定义它的文件中访问。特别是使用 static 关键字定义的全局变量。</p>
+<pre><code class="language-c">// file1.c
+static int internal_var = 20; // 内部链接
+
+// file2.c
+int internal_var; // 不能访问
+</code></pre>
+<h5 id="no-linkage">无链接（No Linkage）</h5>
+<p>无链接的变量在其作用域内是唯一的，无法在其他作用域中访问。例如局部变量和函数参数。</p>
+<pre><code class="language-c">void func() {
+    int local_var = 30; // 无链接
+    // local_var 只能在 func 内部访问
+}
+</code></pre>
+<h3 id="_7">变量的声明和定义</h3>
 <p>变量的声明有两种情况：一种是需要建立存储空间的声明，称为定义性声明；另一种是不需要建立存储空间的声明，称为引用性声明。</p>
 <pre><code class="language-c">int a = 1; // 这是变量的定义
 
 extern int a; // 这是变量的声明
 </code></pre>
-<h3 id="_6">函数的声明和定义</h3>
+<h3 id="_8">函数的声明和定义</h3>
 <p>函数的声明通常在头文件中，而定义在.c文件中。</p>
 <pre><code class="language-c">
 // func.h
@@ -189,7 +221,7 @@ int add(int a, int b) { // 函数定义
     return a + b;
 }
 </code></pre>
-<h4 id="_7">传值和传地址</h4>
+<h4 id="_9">传值和传地址</h4>
 <p>在C语言中，函数的参数传递有两种方式：传值和传址。</p>
 <ol>
 <li>传值（Pass by Value）：函数内部对参数进行修改不会影响外部的实参。</li>
