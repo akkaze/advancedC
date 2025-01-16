@@ -155,12 +155,18 @@
                 <h1 id="_1">动态分析</h1>
 <h2 id="sanitizer">sanitizer</h2>
 <h3 id="address-sanitizer">address sanitizer</h3>
+<p>-fsanitize=address
+/fsanitize=address</p>
 <h3 id="leak-sanitizer">leak sanitizer</h3>
+<p>-fsanitize=leak</p>
 <h3 id="undefine-behavior-sanitizer">undefine behavior sanitizer</h3>
 <h3 id="thread-sanitizer">thread sanitizer</h3>
+<p>-fsanitize=thread</p>
 <h2 id="valgrind">valgrind</h2>
 <h3 id="memcheck">memcheck</h3>
+<p>valgrind --tools=memcheck -s ./executable arg1 arg2 ...</p>
 <h3 id="helgrind">helgrind</h3>
+<p>valgrind --tools=helgrind -s ./executable arg1 arg2 ...</p>
               
             </div>
           </div><footer>

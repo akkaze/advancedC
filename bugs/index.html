@@ -118,17 +118,27 @@
     </li>
         </ul>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_27">除法</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#_28">正数除零上溢出</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#_29">负数除零上溢出</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#_30">零除零上溢出</a>
+    </li>
+        </ul>
+    </li>
         </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#bug_2">内存BUG</a>
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#overflow">内存越界（overflow）</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#_27">堆内存越界</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_31">堆内存越界</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#_28">栈内存越界</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_32">栈内存越界</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#_29">全局内存越界</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_33">全局内存越界</a>
     </li>
         </ul>
     </li>
@@ -138,11 +148,11 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#use-after-free">释放后使用（use after free）</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#_30">野指针</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_34">野指针</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#_31">空指针</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_35">空指针</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#_32">悬垂指针</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_36">悬垂指针</a>
     </li>
         </ul>
     </li>
@@ -150,15 +160,15 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#bug_3">并发BUG</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#_33">数据读写竞争</a>
+    <li class="toctree-l3"><a class="reference internal" href="#_37">数据读写竞争</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#bug_4">锁相关BUG</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#_34">死锁</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_38">死锁</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#_35">不可重入锁重入</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_39">不可重入锁重入</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#_36">锁在同一线程多次释放</a>
+    <li class="toctree-l4"><a class="reference internal" href="#_40">锁在同一线程多次释放</a>
     </li>
         </ul>
     </li>
@@ -319,9 +329,26 @@ assert(b == INF);
 float b = a * 2.0;
 assert(b == -INF);
 </code></pre>
+<h3 id="_27">除法</h3>
+<p>事实上除零并不一定完全就是除以0，因为浮点数的精度有误差，事实上除以一个很小的数，小于FLT_EPS等同于除零。</p>
+<h4 id="_28">正数除零上溢出</h4>
+<pre><code class="language-c">float a = 2.0;
+float b = a / 0.0;
+assert(b == INF);
+</code></pre>
+<h4 id="_29">负数除零上溢出</h4>
+<pre><code class="language-c">float a = -2.0;
+float b = a / 0.0;
+assert(b == -INF);
+</code></pre>
+<h4 id="_30">零除零上溢出</h4>
+<pre><code class="language-c">float a = 0.0;
+float b = a / 0.0;
+assert(b == NAN);
+</code></pre>
 <h2 id="bug_2">内存BUG</h2>
 <h3 id="overflow">内存越界（overflow）</h3>
-<h4 id="_27">堆内存越界</h4>
+<h4 id="_31">堆内存越界</h4>
 <pre><code class="language-c">int main() {
   int* ptr = (int*)malloc(8 * sizeof(int));
   ptr[10] = 10;
@@ -329,14 +356,14 @@ assert(b == -INF);
   return 0;
 }
 </code></pre>
-<h4 id="_28">栈内存越界</h4>
+<h4 id="_32">栈内存越界</h4>
 <pre><code class="language-c">int main() {
   int arr[10] = {0};
   arr[10] = 10;
   return 0;
 }
 </code></pre>
-<h4 id="_29">全局内存越界</h4>
+<h4 id="_33">全局内存越界</h4>
 <pre><code class="language-c">int arr[10] = {0};
 int main() {
   arr[10] = 10;
@@ -378,9 +405,9 @@ int main() {
   return 0;
 }
 </code></pre>
-<h3 id="_30">野指针</h3>
+<h3 id="_34">野指针</h3>
 <p>以下类型统称为野指针</p>
-<h4 id="_31">空指针</h4>
+<h4 id="_35">空指针</h4>
 <p>初始化为空的指针</p>
 <pre><code class="language-c">int main() {
   int* p = NULL;
@@ -396,7 +423,7 @@ int main() {
   return 0;
 }
 </code></pre>
-<h4 id="_32">悬垂指针</h4>
+<h4 id="_36">悬垂指针</h4>
 <p>悬垂通常指该指针指向的内容的生命周期已经结束，最典型的是返回栈上变量的地址。</p>
 <pre><code class="language-c">int* func() {
   int a = 0;
@@ -423,8 +450,8 @@ int main() {
 }
 </code></pre>
 <h2 id="bug_3">并发BUG</h2>
-<p>为了可移植性，这里使用tinycthread的api。</p>
-<h3 id="_33">数据读写竞争</h3>
+<p>为了可移植性，这里使用<a href="https://github.com/tinycthread/tinycthread">tinycthread</a>的api。</p>
+<h3 id="_37">数据读写竞争</h3>
 <h3 id="bug_4">锁相关BUG</h3>
 <pre><code class="language-c">#include &lt;tinycthread.h&gt;
 
@@ -465,7 +492,7 @@ int main(int argc, char const *argv[])
     return 0;
 }
 </code></pre>
-<h4 id="_34">死锁</h4>
+<h4 id="_38">死锁</h4>
 <pre><code class="language-c">#include &lt;tinycthread.h&gt;
 
 mtx_t mtx1;
@@ -523,7 +550,7 @@ int main(int argc, char const *argv[])
   return 0;
 }
 </code></pre>
-<h4 id="_35">不可重入锁重入</h4>
+<h4 id="_39">不可重入锁重入</h4>
 <pre><code class="language-c">#include &lt;tinycthread.h&gt;
 
 mtx_t mtx;
@@ -575,7 +602,7 @@ int main(int argc, char const *argv[])
   return 0;
 }
 </code></pre>
-<h4 id="_36">锁在同一线程多次释放</h4>
+<h4 id="_40">锁在同一线程多次释放</h4>
 <pre><code class="language-c">#include &lt;tinycthread.h&gt;
 
 mtx_t mtx;
