@@ -14,13 +14,34 @@
 #define CALL_ADD(type) add_##type
 ```
 ```c
-DECL_ADD(int);
-DECL_ADD(float);
+DECL_ADD(int)
+DECL_ADD(float)
 ```
+使用`gcc -E`命令可以看到声明被展开为
 ```c
-IMPL_ADD(int);
-IMPL_ADD(float);
+void add_int(int* dst, int* lhs, int* rhs, unsigned int num);
+void add_float(float* dst, float* lhs, float* rhs, unsigned int num);
 ```
+可以看到函数名和参数类型都被实例化为了具体的类型，同一个模板得到的是两份不同的代码。
+```c
+IMPL_ADD(int)
+IMPL_ADD(float)
+```
+同样使用`gcc -E`命令展开宏，这里需要稍微格式化一下，因为宏通常会被展开到一行，这样会难于阅读。
+可以使用`clang-format`来格式化代码，完整的命令是`gcc -E add.h|clang-format`，得到如下的代码
+```c
+void add_int(int *dst, int *lhs, int *rhs, unsigned int num) {
+  for (unsinged int i = 0; i < num; i++) {
+    dst[i] = lhs[i] + rhs[i];
+  }
+}
+void add_float(float *dst, float *lhs, float *rhs, unsigned int num) {
+  for (unsinged int i = 0; i < num; i++) {
+    dst[i] = lhs[i] + rhs[i];
+  }
+}
+```
+可以看到两个完全不同的实现。
 ```c
 CALL_ADD(int)(dst, lhs, rhs, num);
 CALL_ADD(float)(dst, lhs, rhs, num);
