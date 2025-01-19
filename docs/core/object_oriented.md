@@ -2,7 +2,7 @@
 ## 封装
 ### 抽象
 ```c
-enum gender_s {
+enum gender_e {
   MALE,
   FEMALE
 } gender_t;
@@ -120,11 +120,11 @@ typedef struct man_s {
   object super2;
 } man;
 ```
-### 向上转换
+### 向上转换（子类转基类）
 ```c
 object* super = (object*)((char*)someone + offsetof(man, super2)); 
 ```
-### 向下转换
+### 向下转换（基类转子类）
 ```c
 man* someone = (man*)((char*)super - offsetof(man, super2)); 
 ```
@@ -173,7 +173,7 @@ void cat_sound() {
 }
 
 void cat_ctor(cat* self) {
-  cat->super.sound = cat_sound;
+  self->super.sound = cat_sound;
 }
 ```
 
@@ -186,8 +186,90 @@ spike->sound();
 DEL_ANIMAL(tom);
 DEL_ANIMAL(spike);
 ```
+#### 多继承
+**多继承的关键在于在虚基类的头部记录自身在子类中的偏移，通过这个偏移才能更好的向下转换。同时需要在子类头部记录所有基类的偏移，通过这个更好的向上转换。**这样做的浪费非常大，并且还有一点需要注意，基类在所有子类中的出现顺序必须一致。借这个例子来阐述一下虚析构函数
+
+```c
+typedef struct animal_s {
+  size_t offset;
+  sound_func_t sound;
+} animal;
+
+typedef typedef void (destroy_func_t*)(animal*);
+
+typedef object_s {
+  size_t offset;
+  destroy_func_t destroy;
+} object;
+
+typedef struct dog_s {
+  size_t offsets[2];
+  animal super1;
+  object super2; 
+} dog;
+
+void dog_sound() {
+  printf("wow\n");
+}
+
+void dog_destory() {
+  printf("dog\n");
+}
+void dog_ctor(dog* self) {
+  self->offsets[0] = offsetof(dog, super1);
+  self->super1.offset = offsetof(dog, super1);
+  self->super1.sound = dog_sound;
+  self->offsets[1] = offsetof(dog, super2);
+  self->super2.offset = offsetof(dog, super2);
+  self->super2.destory = dog_destory;
+}
+
+typedef struct cat_s {
+  animal super1;
+  object super2; 
+} cat;
+
+void cat_sound() {
+  printf("meow\n");
+}
+
+void cat_destory() {
+  printf("cat\n");
+}
+void cat_ctor(cat* self) {
+  self->offsets[0] = offsetof(cat, super1);
+  self->super1.offset = offsetof(cat, super1);
+  self->super1.sound = cat_sound;
+  self->offsets[1] = offsetof(cat, super2);
+  self->super2.offset = offsetof(cat, super2);
+  self->super2.destory = dog_destory;
+}
+```
+```c
+#define NEW_ANIMAL(type) ({                                      \
+  type* oneanimal = (type*)malloc(sizeof(type));                 \
+  type##_ctor(oneanimal);                                        \
+  (animal*)oneanimal;                                            \
+})
+#define DEL_ANIMAL(oneanimal) ({                                  \
+  char* head = (char*)(oneanimal - oneanimal->offset)             \
+  object* super2 = (object*)(head + ((size_t*)head)[1]);          \
+  super2->destory();                                              \
+  free(head);                                                     \
+})
+
+animal* tom = (animal*)NEW_ANIMAL(cat);
+animal* spike = (animal*)NEW_ANIMAL(dog);
+tom->sound();
+spike->sound();
+// 这个时候已经不知道tom和spike的具体类型了，因为可能是在另一个函数里调用的
+DEL_ANIMAL(tom);
+DEL_ANIMAL(spike);
+```
 ### 一般性的表驱动
-这里的关键是定义type_code，并让它作为所有子类的第一个成员，这相当于c++的type_info，但是在内存占用上更优，如果对象非常多，这也是不小的优化。比如在渲染引擎中，dom元素会发出多，每一个都持有虚表指针，这样会造成浪费。type_code可以在不同的表之间共用，这也是它的优势。
+这里的关键是定义type_code，并让它作为所有子类的第一个成员，这相当于c++的type_info，但是在内存占用上更优，如果对象非常多，这也是不小的优化。比如在渲染引擎中，dom元素对象会非常多，每一个都持有虚表指针，这样会造成浪费。
+type_code可以在不同的表之间共用，这也是它的优势。在不同表之间共用，相当于多重虚继承。
+**通常情况下，子类的个数很难超过256，code只占1个字节，而虚表指针要占8个字节（64位系统）。在多继承的情况下这个优势更明显。**
 ```c
 typedef void* animal_handle;
 typedef enum {
@@ -201,12 +283,24 @@ typedef struct {
   sound_func_t sound;
 } sound_method;
 
+// 可以在多张表之间共用
+typedef struct {
+  animal_code code;
+  destory_func_t sound;
+} destory_method;
 
 sound_method sound_methods[] = {
   {DOG, dog_sound},
   {CAT, cat_sound},
   {NONE, animal_sound}
 }
+
+destory_method destory_methods[] = {
+  {DOG, dog_destory},
+  {CAT, cat_destory},
+  {NONE, NULL}
+}
+
 
 typedef struct animal_s {
   animal_code code;
@@ -247,6 +341,13 @@ void cat_ctor(cat* self) {
   animal_code __code = *(animal_code*)handle;         \
   sound_func_t __sound = LOOKUP_SOUND_METHOD(__code); \
   __sound();                                          \ 
+}
+
+// 类似的方法可以实现 CALL_DESTORY_METHOD
+
+#define DEL_ANIMAL(oneanimal) {                      \
+  CALL_DESTORY_METHOD(oneanimal);                    \
+  free(oneanimal);                                   \
 }
 ```
 ```c
